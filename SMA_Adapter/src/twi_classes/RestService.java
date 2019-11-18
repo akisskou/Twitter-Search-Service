@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import twitter4j.MediaEntity;
 import twitter4j.Status;
 
-//@Path("/twiservice")
+
 @Path("")
 public class RestService {
 	static ConfigureFile configureFile=null;
