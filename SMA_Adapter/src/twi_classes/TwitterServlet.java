@@ -1,49 +1,24 @@
 package twi_classes;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Scanner;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.json.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.google.gson.Gson;
-import com.sun.net.httpserver.HttpExchange;
 
 import twitter4j.MediaEntity;
 import twitter4j.Status;
@@ -66,13 +41,6 @@ public class TwitterServlet extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
     
-    private static boolean isContain(String source, String subItem){
-        String pattern = "\\b"+subItem+"\\b";
-        Pattern p=Pattern.compile(pattern);
-        Matcher m=p.matcher(source);
-        return m.find();
-   }
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -159,7 +127,6 @@ public class TwitterServlet extends HttpServlet {
 				List<String[]> keywordsList = new ArrayList<String[]>();
 				for(int i=0; i<req.keywords.length; i++){
 					keywordsList.add((req.keywords)[i].split("\\|"));
-					System.out.println(keywordsList.get(i)[0]);
 				}
 			  String placeString = (req.place);
 			  String logic = req.logic;
@@ -335,9 +302,6 @@ public class TwitterServlet extends HttpServlet {
 							endIndex = startIndex + aKeyword.length();
 							while(endIndex<tweetText.length() && ((tweetText.charAt(endIndex)>='a' && tweetText.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
 							tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());
-							
-							/*if(myKeyWord.equals("")) myKeyWord+=aKeyword;
-							else myKeyWord+=", "+aKeyword;*/
 						}
 						jsonObject.put("postText", tweetText);
 						jsonObject.put("postPhoto", images);

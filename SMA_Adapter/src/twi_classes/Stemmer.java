@@ -1,7 +1,5 @@
 package twi_classes;
 
-import java.io.*;
-
 public class Stemmer {
 	   private char[] b;
 	   private int i,     /* offset into b */
