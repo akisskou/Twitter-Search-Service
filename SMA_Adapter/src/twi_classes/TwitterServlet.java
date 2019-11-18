@@ -42,8 +42,6 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.tartarus.snowball.ext.PorterStemmer;
-
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -165,7 +163,6 @@ public class TwitterServlet extends HttpServlet {
 				}
 			  String placeString = (req.place);
 			  String logic = req.logic;
-			  String akalogic = req.akalogic;
 			
 			  List<JSONObject> listJSONobj = new ArrayList<JSONObject>();
 			  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());

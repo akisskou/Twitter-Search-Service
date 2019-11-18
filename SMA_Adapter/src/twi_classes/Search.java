@@ -4,5 +4,4 @@ public class Search {
 	String[] keywords;
 	String place;
 	String logic;
-	String akalogic;
 }

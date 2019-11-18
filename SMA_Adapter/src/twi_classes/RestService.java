@@ -57,7 +57,6 @@ public class RestService {
 		  }
 		  String placeString = (req.place);
 		  String logic = req.logic;
-		  String akalogic = req.akalogic;
 		  
 		  List<JSONObject> listJSONobj = new ArrayList<JSONObject>();
 		  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());
