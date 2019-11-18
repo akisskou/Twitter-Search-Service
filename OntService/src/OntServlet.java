@@ -108,30 +108,25 @@ public class OntServlet extends HttpServlet {
                     if(a.getValue() instanceof OWLLiteral) {
                         OWLLiteral val = (OWLLiteral) a.getValue();
                         f.label = val.getLiteral();
-                        //System.out.println(f.label);
                     }
                 }
         		else if(a.getProperty().isComment()) {
                     if(a.getValue() instanceof OWLLiteral) {
                         OWLLiteral val = (OWLLiteral) a.getValue();
                         f.comment = val.getLiteral();
-                        //System.out.println(f.comment);
                     }
                 }
         		else{
-        			//System.out.println(a.getProperty().getIRI().getFragment());
         			if(a.getProperty().getIRI().getFragment().equals("aka")){
         				if(a.getValue() instanceof OWLLiteral) {
                             OWLLiteral val = (OWLLiteral) a.getValue();
                             f.aka = val.getLiteral();
-                            //System.out.println(val.getLiteral());
                         }
         			}
         			else if(a.getProperty().getIRI().getFragment().equals("acronym")){
         				if(a.getValue() instanceof OWLLiteral) {
                             OWLLiteral val = (OWLLiteral) a.getValue();
                             f.acronym = val.getLiteral();
-                            //System.out.println(val.getLiteral());
                         }
         			}
         		}
@@ -163,12 +158,6 @@ public class OntServlet extends HttpServlet {
             	
             }
         }
-        /*for(int i=0; i<allClasses.size(); i++){
-        	System.out.println(allClasses.get(i).name.getIRI().getFragment());
-        	for(int j=0; j<allClasses.get(i).subClasses.size(); j++){
-        		System.out.println(allClasses.get(i).subClasses.get(j).name.getIRI().getFragment() + " extends " + allClasses.get(i).name.getIRI().getFragment());
-        	}
-        }*/
 	}
 	
 	private static void findSubJson(List<JSONObject> subs, aClass ac){
@@ -189,11 +178,6 @@ public class OntServlet extends HttpServlet {
 				ac1.put("li_attr",cont);
 				ac1.put("children", subs1);
 				
-				/*ac1.put("label", ac.subClasses.get(i).label);
-				ac1.put("comment", ac.subClasses.get(i).comment);
-				ac1.put("aka", ac.subClasses.get(i).aka);
-				//ac1.put("name", ac.subClasses.get(i).name.getIRI().getFragment());
-				ac1.put("subs", subs1);*/
 				subs.add(ac1);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -210,14 +194,12 @@ public class OntServlet extends HttpServlet {
 				List<String> akaList = Arrays.asList(checked.aka.split(",[ ]*"));
 				for(int i=0; i<akaList.size(); i++){
 					keywords += "|"+akaList.get(i)+" (aka of "+checked.label+")";
-					//System.out.println(akaList.get(i));
 				}
 			}
 			if(!(checked.acronym.equals(""))){
 				List<String> acronymList = Arrays.asList(checked.acronym.split(",[ ]*"));
 				for(int i=0; i<acronymList.size(); i++){
 					keywords += "|"+acronymList.get(i)+" (acronym of "+checked.label+")";
-					//System.out.println(acronymList.get(i));
 				}
 			}
 
@@ -244,15 +226,10 @@ public class OntServlet extends HttpServlet {
 					if(!(allClasses.get(i).comment.equals(""))) content+="<br/>"+allClasses.get(i).comment;
 					if(!(allClasses.get(i).aka.equals(""))) content+="<br/>aka: "+allClasses.get(i).aka;
 					if(!(allClasses.get(i).acronym.equals(""))) content+="<br/>acronym: "+allClasses.get(i).acronym;
-					cont.put("content", content);
-					//cont.put("content", allClasses.get(i).label+"</br>"+allClasses.get(i).comment+"</br>aka: "+allClasses.get(i).aka+"</br>");
-					
+					cont.put("content", content);					
 					ac.put("li_attr",cont);
 					ac.put("children", subs);
-					/*ac.put("label", allClasses.get(i).label);
-					ac.put("comment", allClasses.get(i).comment);
-					ac.put("aka", allClasses.get(i).aka);
-					ac.put("subs", subs);*/
+					
 					ontology.add(ac);					
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -285,44 +262,15 @@ public class OntServlet extends HttpServlet {
 		}
 		JSONObject all = new JSONObject();
 		List<JSONObject> ontology = new ArrayList<JSONObject>();
-		//JSONObject resp = new JSONObject();
 		List<JSONObject> tweets = new ArrayList<JSONObject>();
 		String querykeywords="";
 		String checked = request.getParameter("items");
 		String logic = request.getParameter("logic");
 		akalogic = request.getParameter("akalogic");
-		if(checked.equals("null")){
-		/*for(int i=0; i<allClasses.size(); i++){
-			if(!allClasses.get(i).isSubClass){
-				try {
-					JSONObject ac = new JSONObject();
-					JSONObject cont = new JSONObject();
-					String content="";
-					List<JSONObject> subs = new ArrayList<JSONObject>();
-					findSubJson(subs, allClasses.get(i));
-					ac.put("id", allClasses.get(i).id);
-					ac.put("text", allClasses.get(i).label);
-					content+=allClasses.get(i).label;
-					if(!(allClasses.get(i).comment.equals(""))) content+="<br/>"+allClasses.get(i).comment;
-					if(!(allClasses.get(i).aka.equals(""))) content+="<br/>aka: "+allClasses.get(i).aka;
-					cont.put("content", content);
-					
-					ac.put("li_attr",cont);
-					ac.put("children", subs);
-					ontology.add(ac);					
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		}*/
-			ontology = fetchOntology(ontology);
-		}
+		if(checked.equals("null")) ontology = fetchOntology(ontology);
 		else{
-		//if(!checked.equals("null")){
-			//URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
-			URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
+			URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
+			//URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
 			List<String> checkedList = Arrays.asList(checked.split(","));
 			List<String> keywordsList = new ArrayList<String>();
 			ontology = fetchOntology(ontology);
@@ -330,28 +278,10 @@ public class OntServlet extends HttpServlet {
 				for(int i=0; i<allClasses.size(); i++){
 					if(checkedList.get(j).equals(allClasses.get(i).id)){
 						try{
-							/*JSONObject ac = new JSONObject();
-							JSONObject cont = new JSONObject();
-							String content="";
-							List<JSONObject> subs = new ArrayList<JSONObject>();
-							findSubJson(subs, allClasses.get(i));
-							ac.put("id", allClasses.get(i).id);
-							ac.put("text", allClasses.get(i).label);*/
 							String keywords = getSubKeywords("", allClasses.get(i));
 							keywordsList.add(keywords);
 							if(querykeywords.equals("")) querykeywords = allClasses.get(i).label;
-							else querykeywords += ", "+allClasses.get(i).label;
-						    /*content+=allClasses.get(i).label;
-							if(!(allClasses.get(i).comment.equals(""))) content+="<br/>"+allClasses.get(i).comment;
-							if(!(allClasses.get(i).aka.equals(""))){
-								content+="<br/>aka: "+allClasses.get(i).aka;
-							}
-							cont.put("content", content);
-							
-							ac.put("li_attr",cont);
-							ac.put("children", subs);
-							ontology.add(ac);*/	
-							
+							else querykeywords += ", "+allClasses.get(i).label;		
 						}
 						catch (Exception e) {
 				   			System.out.println(e);
@@ -386,16 +316,6 @@ public class OntServlet extends HttpServlet {
 			    System.out.println(jsonarr);
 			    JSONArray jsonarray = new JSONArray(jsonarr);
 			    for (int k = 0; k < jsonarray.length(); k++) {
-			    
-			    	/*JSONObject newTweet = new JSONObject();
-			        JSONObject jsonobject = jsonarray.getJSONObject(k);
-			        newTweet.put("poster", jsonobject.getString("poster"));
-					newTweet.put("sourceImg", jsonobject.getString("sourceImg"));
-					newTweet.put("postPhoto", jsonobject.getString("postPhoto"));
-					newTweet.put("postText", jsonobject.getString("postText"));	
-					newTweet.put("postDate", jsonobject.getString("postDate"));
-					newTweet.put("source", jsonobject.getString("source"));
-					newTweet.put("keyword", jsonobject.getString("keyword"));*/
 		            tweets.add(jsonarray.getJSONObject(k));
 			    }
 			}
@@ -404,106 +324,6 @@ public class OntServlet extends HttpServlet {
 			catch (Exception e) {
 	   			System.out.println(e);
 	   		}
-			
-			/*ConfigurationBuilder cb = new ConfigurationBuilder();
-		    cb.setDebugEnabled(true).
-		    setOAuthConsumerKey("KlgQdmfSffRfH7Bj25v0zXoeW").setOAuthConsumerSecret("5ZTFwwPIEGq5a0WY75raXNtTMGQM1GRdozvY1K3VE4T5H4UkmP").setOAuthAccessToken("273049818-Ez9NWMfgO9UzLpLjlxCVRfoToQPDMWqxvKTpRNLQ").setOAuthAccessTokenSecret("TV2lUGRJCDo0dzX3Fmy307yyIU4yvxBks57mWd8lpJzuH")
-		    .setTweetModeExtended(true);
-		    TwitterFactory tf = new TwitterFactory(cb.build());
-		    Twitter t = tf.getInstance();
-		    
-			List<String> checkedList = Arrays.asList(checked.split(","));
-			for(int j=0; j<checkedList.size(); j++){
-				for(int i=0; i<allClasses.size(); i++){
-					if(checkedList.get(j).equals(allClasses.get(i).id)){
-						try{
-							JSONObject ac = new JSONObject();
-							JSONObject cont = new JSONObject();
-							String content="";
-							List<JSONObject> subs = new ArrayList<JSONObject>();
-							findSubJson(subs, allClasses.get(i));
-							ac.put("id", allClasses.get(i).id);
-							ac.put("text", allClasses.get(i).label);
-							
-						    try {
-						    	Query topicQuery = new Query(allClasses.get(i).label);
-						    	topicQuery.setCount(100);
-						    	topicQuery.setLang("en");
-						    	
-							
-								QueryResult queryResult1 = t.search(topicQuery);
-								
-								
-								
-								
-									List<Status> mytweets = queryResult1.getTweets();
-									
-								for (Status aStatus : mytweets){
-								if (!aStatus.isRetweet()){
-									JSONObject newTweet = new JSONObject();
-									newTweet.put("poster", aStatus.getUser().getName());
-									newTweet.put("sourceImg", aStatus.getUser().getProfileImageURL());
-									newTweet.put("postPhoto", "");
-									MediaEntity[] media = aStatus.getMediaEntities();
-									for(MediaEntity m : media){ //search trough your entities
-									    newTweet.put("postPhoto", m.getMediaURL());
-									}
-									newTweet.put("postText", aStatus.getText());	
-									newTweet.put("postDate", aStatus.getCreatedAt());
-									newTweet.put("source", (aStatus.getSource().split(">"))[1].split("<")[0]);
-						            tweets.add(newTweet);
-								}
-								}
-								
-							} catch (TwitterException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							content+=allClasses.get(i).label;
-							if(!(allClasses.get(i).comment.equals(""))) content+="<br/>"+allClasses.get(i).comment;
-							if(!(allClasses.get(i).aka.equals(""))){
-								content+="<br/>aka: "+allClasses.get(i).aka;
-								/*try {
-									Query topicQuery = new Query(allClasses.get(i).aka);
-									topicQuery.setCount(100);
-							    	topicQuery.setLang("en");
-									QueryResult queryResult1 = t.search(topicQuery);
-									for (Status aStatus : queryResult1.getTweets()){
-									if (!aStatus.isRetweet()){
-										JSONObject newTweet = new JSONObject();
-										newTweet.put("poster", aStatus.getUser().getName());
-										newTweet.put("sourceImg", aStatus.getUser().getBiggerProfileImageURL());
-										newTweet.put("postPhoto", "");
-										MediaEntity[] media = aStatus.getMediaEntities();
-										for(MediaEntity m : media){ //search trough your entities
-										    newTweet.put("postPhoto", m.getMediaURL());
-										}
-										newTweet.put("postText", aStatus.getText());	
-										newTweet.put("postDate", aStatus.getCreatedAt());
-										newTweet.put("source", (aStatus.getSource()/*.split(">"))[1].split("<")[0]));
-							            tweets.add(newTweet);
-									}
-							        }
-									
-								} catch (TwitterException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-							}
-							cont.put("content", content);
-							
-							ac.put("li_attr",cont);
-							ac.put("children", subs);
-							ontology.add(ac);					
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						break;
-						
-					}
-				}
-			}*/
 		}
 		try {
 			all.put("ontology", ontology);
@@ -512,7 +332,6 @@ public class OntServlet extends HttpServlet {
 			all.put("total", tweets.size());
 			all.put("logic", logic);
 			all.put("akalogic", akalogic);
-			//System.out.println(tweets.size());
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
