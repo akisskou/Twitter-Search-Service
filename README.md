@@ -7,6 +7,5 @@ A project for smart twitter search
 {
   "keywords": ["Interventions|Vaccination", "Arthritis", ..., "Pregnancy|Single|Twins"],
   "place": "",
-  "logic": "or",
-  "akalogic": "no"
+  "logic": "and"
 }
