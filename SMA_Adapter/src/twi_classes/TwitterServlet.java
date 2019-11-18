@@ -167,10 +167,8 @@ public class TwitterServlet extends HttpServlet {
 			  String logic = req.logic;
 			  String akalogic = req.akalogic;
 			
-			  //System.out.println("The place is: "+placeString);
 			  List<JSONObject> listJSONobj = new ArrayList<JSONObject>();
 			  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());
-			System.out.println(logic);
 			  
 			for (Status tweet : ConfigNRetrieve.tweets) {
 				String myKeyWord="";
@@ -197,7 +195,6 @@ public class TwitterServlet extends HttpServlet {
 							//if(tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+".") || tweetText.contains("\n"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"\n") || tweetText.contains("\n"+myKeywordString+"\n") || tweetText.contains("-"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"-")){
 							if(tweetText.contains(myKeywordString) && (tweetText.indexOf(myKeywordString)==0 || (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z')) && (!allCapitals || tweetText.contains(" "+myKeywordString+" "))){	
 								found=1;
-								System.out.println(myKeywordString);
 								if(myKeyWord.equals("")) myKeyWord+=keywordString;
 								else{
 									String[] myKeys = myKeyWord.split("\\|[ ]*");
@@ -216,9 +213,6 @@ public class TwitterServlet extends HttpServlet {
 								break;
 							}
 							if(!allCapitals){
-								/*PorterStemmer stemmer = new PorterStemmer();
-								//stemmer.setCurrent(myKeywordString); //set string you need to stem
-								stemmer.stem();  //stem the word*/
 								Stemmer s = new Stemmer(); 
 								char[] stemming = myKeywordString.toCharArray();
 								for(int st=0; st<stemming.length; st++){
@@ -245,8 +239,6 @@ public class TwitterServlet extends HttpServlet {
 									break;
 								}
 							}
-							//if(!tweet.getText().toLowerCase().contains(keywordString.toLowerCase())) TweetContainAllKeywords=false;
-							//System.out.println("One keyeord is:" + keywordString);
 						}
 						if (found==1)
 							continue;
@@ -280,9 +272,6 @@ public class TwitterServlet extends HttpServlet {
 									break;
 								}
 								if(!allCapitals){
-									/*PorterStemmer stemmer = new PorterStemmer();
-									//stemmer.setCurrent(myKeywordString); //set string you need to stem
-									stemmer.stem();  //stem the word*/
 									Stemmer s = new Stemmer(); 
 									char[] stemming = myKeywordString.toCharArray();
 									for(int st=0; st<stemming.length; st++){
@@ -297,8 +286,6 @@ public class TwitterServlet extends HttpServlet {
 										break;
 									}
 								}
-								//if(!tweet.getText().toLowerCase().contains(keywordString.toLowerCase())) TweetContainAllKeywords=false;
-								//System.out.println("One keyeord is:" + keywordString);
 							}
 							if (found==1) break;
 						}
@@ -319,7 +306,6 @@ public class TwitterServlet extends HttpServlet {
 						jsonObject.put("sourceImg", tweet.getUser().getBiggerProfileImageURL());
 						jsonObject.put("poster", tweet.getUser().getName());
 						jsonObject.put("postDate", tweet.getCreatedAt());
-						//String[] myKeywordsArray = myKeyWord.split("\\|[ ]*");
 						String[] myKeywordsArray = actualKeyword.split("\\|[ ]*");
 						String tweetText = tweet.getText();
 						for(String aKeyword: myKeywordsArray){
