@@ -1,18 +1,10 @@
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,55 +13,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
-import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
-import org.semanticweb.owlapi.search.EntitySearcher;
-
-import sun.rmi.runtime.Log;
-import twitter4j.MediaEntity;
-import twitter4j.Query;
-import twitter4j.QueryResult;
-import twitter4j.Status;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 
 
 /**
@@ -81,9 +41,7 @@ public class OntServlet extends HttpServlet {
 	private static String akalogic;
 	private static OWLOntologyManager manager;
 	private static IRI documentIRI;
-	private static OWLDataFactory df;
 	private static List<aClass> allClasses;
-	private static long sleepTime = 15*60*1000;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -252,7 +210,6 @@ public class OntServlet extends HttpServlet {
 	    documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
 		try{
 	        ontology = manager.loadOntologyFromOntologyDocument(documentIRI);
-            df = manager.getOWLDataFactory();
             findClasses();
             findSubclasses();
 		}
@@ -296,9 +253,7 @@ public class OntServlet extends HttpServlet {
 				params.put("keywords", keywordsList);
 			    params.put("place", "");
 			    params.put("logic", logic);
-			    params.put("akalogic", akalogic);
 			    String postData = params.toString();
-			    System.out.println(postData);
 			    byte[] postDataBytes = postData.getBytes("UTF-8");
 			    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 			    conn.setRequestMethod("POST");
@@ -313,7 +268,6 @@ public class OntServlet extends HttpServlet {
 			    String resp = sb.toString();
 			    List<String> myresp = Arrays.asList(resp.split("\\[",2));
 			    String jsonarr = "[" + myresp.get(1);
-			    System.out.println(jsonarr);
 			    JSONArray jsonarray = new JSONArray(jsonarr);
 			    for (int k = 0; k < jsonarray.length(); k++) {
 		            tweets.add(jsonarray.getJSONObject(k));
