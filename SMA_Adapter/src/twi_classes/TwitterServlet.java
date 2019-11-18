@@ -206,7 +206,6 @@ public class TwitterServlet extends HttpServlet {
 								}
 								if(actualKeyword.equals("")) actualKeyword+=keywordString;
 								else actualKeyword+="| "+keywordString;
-								System.out.println("not stemmed");
 								break;
 							}
 							if(!allCapitals){
