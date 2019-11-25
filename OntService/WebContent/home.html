@@ -113,12 +113,16 @@
  			}
  		}
  		var theurl;
- 		var myItems = sessionStorage.getItem("items");
+ 		sessionStorage.clear();
+ 		/*var myItems = sessionStorage.getItem("items");
  		var logicType = sessionStorage.getItem("logic");
- 		if (logicType==null) logicType='and';
+ 		if (logicType==null)*/
+ 		var myItems=null;
+ 		var logicType='and';
  		sessionStorage.setItem("logic", "and");
- 		var akaLogicType = sessionStorage.getItem("akalogic");
- 		if (akaLogicType==null) akaLogicType='no';
+ 		/*var akaLogicType = sessionStorage.getItem("akalogic");
+ 		if (akaLogicType==null)*/
+ 		var akaLogicType='no';
  		sessionStorage.setItem("akalogic", "no");
  		theurl='OntServlet?items='+myItems+'&logic='+logicType+'&akalogic='+akaLogicType;
  		
@@ -132,9 +136,60 @@
 			var total = response1.total;
 			var logic = response1.logic;
 			var akalogic = response1.akalogic;
-			if(myItems!=null)
+			/*if(myItems!=null)
 			myResults.innerHTML += "<h4 align='left'>"+total+" results for your query: "+query+"<h4><h5 align='left'>logic: "+logic+"<br>akas and acronyms: "+akalogic+"<h5>";
+			*/
+			/*var tweets = '';
+			if (twitter.length>0){
 			
+				tweets += '<table table-layout="auto" width="100%"><tr padding="15px"><th>user</th><th>profile image</th><th>text</th><th>photo</th><th>date</th><th>source</th><th>query annotation</th></tr>';
+				for(i=0; i<twitter.length; i++){
+					if (twitter[i].postPhoto==="")
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'</td><td><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+					else
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'</td><td><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td><img src="'+twitter[i].postPhoto+'" style="width:200px;height:200px;"></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+				}
+ 			}*/
+			fetchOntology(ont,0);
+			});
+	}
+	
+	function getResults() {
+ 		var HttpClient = function() {
+ 			this.get = function(aUrl, aCallback) {
+ 				var anHttpRequest = new XMLHttpRequest();
+ 				anHttpRequest.onreadystatechange = function() { 
+ 					if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+ 						aCallback(anHttpRequest.responseText);
+ 					}
+ 				anHttpRequest.open( "GET", aUrl, true ); 
+ 				anHttpRequest.send( null ); 
+ 			}
+ 		}
+ 		var theurl;
+ 		var myItems = sessionStorage.getItem("items");
+ 		var logicType = sessionStorage.getItem("logic");
+ 		/*if (logicType==null) logicType='and';
+ 		sessionStorage.setItem("logic", "and");*/
+ 		var akaLogicType = sessionStorage.getItem("akalogic");
+ 		/*if (akaLogicType==null) akaLogicType='no';
+ 		sessionStorage.setItem("akalogic", "no");*/
+ 		theurl='OntServlet?items='+myItems+'&logic='+logicType+'&akalogic='+akaLogicType;
+ 		
+ 		var client = new HttpClient();
+ 		client.get(theurl, function(response) { 
+			var response1 = JSON.parse(response);
+			var ont = response1.ontology;
+			var twitter = response1.tweets;
+			var query = response1.query;
+			var total = response1.total;
+			var logic = response1.logic;
+			var akalogic = response1.akalogic;
+			if(myItems!=null){
+				var myResults = '';
+				myResults += "<h4 align='left'>"+total+" results for your query: "+query+"<h4><h5 align='left'>logic: "+logic+"<br>akas and acronyms: "+akalogic+"<h5>";
+				$('#myResults').html(myResults);
+			}			
 			var tweets = '';
 			if (twitter.length>0){
 			
@@ -146,13 +201,15 @@
 						tweets += '<tr align="center"><td>'+twitter[i].poster+'</td><td><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td><img src="'+twitter[i].postPhoto+'" style="width:200px;height:200px;"></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
 				}
  			}
-			fetchOntology(ont,tweets,0);
-			});
+			$('#tweets').html(tweets);
+ 		});
 	}
 	
 	function nextPage(){
 		isChecked=true;
-		location.replace("home.html");
+		//location.replace("home.html");
+		getResults();
+		$('html, body').animate({ scrollTop: 0 }, 'fast');
 	}
 	
 	function homePage(){
@@ -166,7 +223,7 @@
 		
     };
 	
-	function fetchOntology(aSubs,tweets,marg){
+	function fetchOntology(aSubs,marg){
 		$(function () {
 			$('#jstree').jstree({
 		    	  "core" : {
@@ -198,7 +255,7 @@
 			
 			
 			
-			$('#tweets').html(tweets);
+			//$('#tweets').html(tweets);
 			
 			$('#myForm input').on('change', function() {
 				   sessionStorage.setItem("logic", $('input[name=logic]:checked', '#myForm').val());
