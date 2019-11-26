@@ -222,14 +222,18 @@ public class OntServlet extends HttpServlet {
 		List<JSONObject> tweets = new ArrayList<JSONObject>();
 		String querykeywords="";
 		String checked = request.getParameter("items");
+		String myKeywords = request.getParameter("mykeywords");
+		
 		String logic = request.getParameter("logic");
 		akalogic = request.getParameter("akalogic");
-		if(checked.equals("null")) ontology = fetchOntology(ontology);
+		if(checked.equals("null") && myKeywords.equals("null")) ontology = fetchOntology(ontology);
 		else{
-			URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
-			//URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
-			List<String> checkedList = Arrays.asList(checked.split(","));
+			//URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
+			URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
 			List<String> keywordsList = new ArrayList<String>();
+			if(!checked.equals("null")){
+			List<String> checkedList = Arrays.asList(checked.split(","));
+			
 			ontology = fetchOntology(ontology);
 			for(int j=0; j<checkedList.size(); j++){
 				for(int i=0; i<allClasses.size(); i++){
@@ -247,6 +251,15 @@ public class OntServlet extends HttpServlet {
 						break;	
 					}
 				}	
+			}
+			}
+			if(!myKeywords.equals("null")){
+				List<String> mykeywords = Arrays.asList(myKeywords.split(","));
+				for(int j=0; j<mykeywords.size(); j++){
+					keywordsList.add(mykeywords.get(j).trim());
+					if(querykeywords.equals("")) querykeywords = mykeywords.get(j).trim();
+					else querykeywords += ", "+mykeywords.get(j).trim();
+				}
 			}
 			try{
 				JSONObject params = new JSONObject();

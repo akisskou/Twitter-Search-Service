@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Home</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 	*{
   		box-sizing: border-box;
@@ -66,8 +67,14 @@
   			<input type="radio" value="yes" name="akalogic"> YES		
   			<input type="radio" value="no" name="akalogic" checked> NO<br>
 		</form><br>
+		<input type="text" id="mykeywords" placeholder="Enter your keywords..."><br>
+		<br>
+		or pick some keywords from the ontology:<br>
+		<br>
 		<div id="jstree">
         </div>
+        <br>
+        <button onclick='nextPage()'>Submit</button><br>
         <div id="data">
         </div>
     </div>
@@ -118,13 +125,14 @@
  		var logicType = sessionStorage.getItem("logic");
  		if (logicType==null)*/
  		var myItems=null;
+ 		var myKeywords=null;
  		var logicType='and';
  		sessionStorage.setItem("logic", "and");
  		/*var akaLogicType = sessionStorage.getItem("akalogic");
  		if (akaLogicType==null)*/
  		var akaLogicType='no';
  		sessionStorage.setItem("akalogic", "no");
- 		theurl='OntServlet?items='+myItems+'&logic='+logicType+'&akalogic='+akaLogicType;
+ 		theurl='OntServlet?items='+myItems+'&mykeywords='+myKeywords+'&logic='+logicType+'&akalogic='+akaLogicType;
  		
  		var client = new HttpClient();
  		client.get(theurl, function(response) { 
@@ -168,14 +176,19 @@
  		}
  		var theurl;
  		var myItems = sessionStorage.getItem("items");
+ 		var myKeywords = document.getElementById('mykeywords');
+		if (!(myKeywords && myKeywords.value.trim()) && !myItems){
+			alert("Please enter or select some keywords");
+			return false;
+		}
  		var logicType = sessionStorage.getItem("logic");
  		/*if (logicType==null) logicType='and';
  		sessionStorage.setItem("logic", "and");*/
  		var akaLogicType = sessionStorage.getItem("akalogic");
  		/*if (akaLogicType==null) akaLogicType='no';
  		sessionStorage.setItem("akalogic", "no");*/
- 		theurl='OntServlet?items='+myItems+'&logic='+logicType+'&akalogic='+akaLogicType;
- 		
+ 		if(myKeywords && myKeywords.value.trim()) theurl='OntServlet?items='+myItems+'&mykeywords='+myKeywords.value.trim()+'&logic='+logicType+'&akalogic='+akaLogicType;
+ 		else theurl='OntServlet?items='+myItems+'&mykeywords=null&logic='+logicType+'&akalogic='+akaLogicType;
  		var client = new HttpClient();
  		client.get(theurl, function(response) { 
 			var response1 = JSON.parse(response);
@@ -185,7 +198,7 @@
 			var total = response1.total;
 			var logic = response1.logic;
 			var akalogic = response1.akalogic;
-			if(myItems!=null){
+			if((myKeywords && myKeywords.value.trim()) || myItems){
 				var myResults = '';
 				myResults += "<h4 align='left'>"+total+" results for your query: "+query+"<h4><h5 align='left'>logic: "+logic+"<br>akas and acronyms: "+akalogic+"<h5>";
 				$('#myResults').html(myResults);
@@ -217,6 +230,10 @@
 		location.replace("home.html");
 	}
 	
+	function searchfunc(){
+		
+	}
+	
 	window.onbeforeunload = function(event)
     {
 		if(!isChecked) sessionStorage.clear();
@@ -243,7 +260,7 @@
    	          idobj.push(node_id);
    	          myids.push(data.node.id);
    	       	  sessionStorage.setItem("items", myids);
-   	          if(idobj.length===1) htmlobj.push("<br><button onclick='nextPage()'>Submit</button>");
+   	          //if(idobj.length===1) htmlobj.push("<br><button onclick='nextPage()'>Submit</button>");
    	          htmlobj.push("<p>"+content+"</p>");
    	          var htmldata="";
    	          for(j=0; j<htmlobj.length; j++){

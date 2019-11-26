@@ -128,6 +128,10 @@ public class TwitterServlet extends HttpServlet {
 				for(int i=0; i<req.keywords.length; i++){
 					keywordsList.add((req.keywords)[i].split("\\|"));
 				}
+				/*String[] mykeywords = new String[req.mykeywords.length];
+				for(int i=0; i<req.mykeywords.length; i++){
+					mykeywords[i]=(req.mykeywords)[i];
+				}*/
 			  String placeString = (req.place);
 			  String logic = req.logic;
 			
@@ -135,6 +139,7 @@ public class TwitterServlet extends HttpServlet {
 			  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());
 			  
 			for (Status tweet : ConfigNRetrieve.tweets) {
+			  if(tweet.getLang().equals("en")){
 				String myKeyWord="";
 				Boolean TweetContainKeywords =true;
 				String actualKeyword = "";
@@ -157,7 +162,7 @@ public class TwitterServlet extends HttpServlet {
 							}
 								
 							//if(tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+".") || tweetText.contains("\n"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"\n") || tweetText.contains("\n"+myKeywordString+"\n") || tweetText.contains("-"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"-")){
-							if(tweetText.contains(myKeywordString) && (tweetText.indexOf(myKeywordString)==0 || (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z')) && (!allCapitals || tweetText.contains(" "+myKeywordString+" "))){	
+							if(tweetText.contains(myKeywordString) && (tweetText.indexOf(myKeywordString)==0 || (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z')) && (!allCapitals || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
 								found=1;
 								if(myKeyWord.equals("")) myKeyWord+=keywordString;
 								else{
@@ -210,7 +215,7 @@ public class TwitterServlet extends HttpServlet {
 							break;
 						}
 					}
-				}
+			}
 				 else{
 				  
 						int found=0;
@@ -228,7 +233,7 @@ public class TwitterServlet extends HttpServlet {
 									myKeywordString = myKeywordString.toLowerCase();
 									tweetText = tweetText.toLowerCase();
 								}
-								if(tweetText.contains(myKeywordString) && (tweetText.indexOf(myKeywordString)==0 || (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z')) && (!allCapitals || tweetText.contains(" "+myKeywordString+" "))){	
+								if(tweetText.contains(myKeywordString) && (tweetText.indexOf(myKeywordString)==0 || (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z')) && (!allCapitals || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
 									found=1;
 									myKeyWord=keywordString;
 									actualKeyword=keywordString;
@@ -252,6 +257,7 @@ public class TwitterServlet extends HttpServlet {
 							}
 							if (found==1) break;
 						}
+						
 						if (found==0) TweetContainKeywords=false;
 				 }
 					
@@ -308,6 +314,7 @@ public class TwitterServlet extends HttpServlet {
 						jsonObject.put("keyword", myKeyWord.replace('|', ','));
 						listJSONobj.add(jsonObject);
 					}
+			  	  }
 				}
 			  
 					

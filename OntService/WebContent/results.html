@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Search results</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<style>
+	*{
+  		box-sizing: border-box;
+	}
+	table, th, td {
+  		border: 1px solid black;
+  		border-collapse: collapse;
+	}
+	th, td {
+  		padding: 15px;
+	}
+	table {
+    	table-layout: auto;
+    	width: 100%;
+	}
+	
+</style>
+</head>
+<body onload="asyncLoadContent()">
+	<div class="container">
+    <div class="column right">
+    	<div id="myResults"></div>
+        <div id="tweets">
+        </div>
+    </div>
+    </div>
+    <!-- 4 include the jQuery library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>  
+  <!-- 5 include the minified jstree source -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    
+	<script type="text/javascript">
+	var myResults = document.getElementById("myResults");
+	var i=0;
+	function asyncLoadContent() { 
+		initOntology();
+	}
+	
+	function initOntology() {
+ 		var HttpClient = function() {
+ 			this.get = function(aUrl, aCallback) {
+ 				var anHttpRequest = new XMLHttpRequest();
+ 				anHttpRequest.onreadystatechange = function() { 
+ 					if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+ 						aCallback(anHttpRequest.responseText);
+ 					}
+ 				anHttpRequest.open( "GET", aUrl, true ); 
+ 				anHttpRequest.send( null ); 
+ 			}
+ 		}
+ 		var theurl;
+ 		var myItems = localStorage.getItem("items");
+ 		var logicType = localStorage.getItem("logic");
+ 		if (logicType==null) logicType='and';
+ 		localStorage.setItem("logic", "and");
+ 		var akaLogicType = localStorage.getItem("akalogic");
+ 		if (akaLogicType==null) akaLogicType='no';
+ 		localStorage.setItem("akalogic", "no");
+ 		theurl='OntServlet?items='+myItems+'&logic='+logicType+'&akalogic='+akaLogicType;
+ 		
+ 		var client = new HttpClient();
+ 		client.get(theurl, function(response) { 
+			var response1 = JSON.parse(response);
+			var ont = response1.ontology;
+			ontUser.innerHTML = '';
+			var twitter = response1.tweets;
+			var query = response1.query;
+			var total = response1.total;
+			var logic = response1.logic;
+			var akalogic = response1.akalogic;
+			if(myItems!=null)
+			myResults.innerHTML += "<h4 align='left'>"+total+" results for your query: "+query+"<h4><h5 align='left'>logic: "+logic+"<br>akas and acronyms: "+akalogic+"<h5>";
+			
+			var tweets = '';
+			if (twitter.length>0){
+			
+				tweets += '<table table-layout="auto" width="100%"><tr padding="15px"><th>user</th><th>profile image</th><th>text</th><th>photo</th><th>date</th><th>source</th><th>query annotation</th></tr>';
+				for(i=0; i<twitter.length; i++){
+					if (twitter[i].postPhoto==="")
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'</td><td><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+					else
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'</td><td><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td><img src="'+twitter[i].postPhoto+'" style="width:200px;height:200px;"></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+				}
+ 			}
+			fetchOntology(ont,tweets,0);
+			});
+	}
+	
+	function fetchOntology(aSubs,tweets,marg){
+		$(function () {
+			
+			
+			$('#tweets').html(tweets);
+			
+		});
+	}
+	</script>
+</body>
+</html>
