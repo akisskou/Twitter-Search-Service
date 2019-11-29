@@ -36,7 +36,6 @@ public static List<Status> tweets;
 	    HashSet<Float> twitersIDs = new HashSet<Float>();
 
 	    Query query = new Query(keywords.get(0)); 
-	    query.setLang("en");
 	    query.setCount(1);
 	    QueryResult result=null;
 		try {
@@ -60,7 +59,6 @@ public static List<Status> tweets;
 		    if(keyword_index==keywords.size()) keyword_index=0;
 		    
 		    query = new Query(keywords.get(keyword_index));
-		    query.setLang("en");
 		    query.setCount(100);
 		    query.resultType(Query.RECENT);//.resultType("recent");
 		    
@@ -108,7 +106,6 @@ public static List<Status> tweets;
 		    if(keyword_index==keywords.size()) keyword_index=0;
 		    
 		    query = new Query(keywords.get(keyword_index));
-		    query.setLang("en");
 		    keyword_index+=1;
 		    query.setCount(100);
 		    query.resultType(Query.RECENT);//.resultType("recent");
