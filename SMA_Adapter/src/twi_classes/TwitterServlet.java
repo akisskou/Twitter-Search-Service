@@ -223,8 +223,58 @@ public class TwitterServlet extends HttpServlet {
 							if (found==1)
 								continue;
 							else{
-								TweetContainKeywords=false;
-								break;
+								String tweetText = tweet.getText();
+								String[] tweetwords = tweetText.split(" ");
+								for(String keywordString: keyWords) {
+									boolean allCapitals = false;
+									String myKeywordString = keywordString.trim();
+									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
+										myKeywordString = keywordString.split("\\(")[0].trim();
+									}
+									if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
+									String[] wordsOfKeywordString = myKeywordString.split(" ");
+									boolean aWordNotFound=true;
+									for(String aWord: wordsOfKeywordString){
+										if(!allCapitals){
+											Stemmer s = new Stemmer(); 
+											char[] stemming = aWord.toCharArray();
+											for(int st=0; st<stemming.length; st++){
+												s.add(stemming[st]);
+											}
+											s.stem();
+											aWord = s.toString();
+										}
+										aWordNotFound=true;
+										for(String aTweetWord: tweetwords){
+											if(aTweetWord.equals(aWord) || (!allCapitals && (aTweetWord.toLowerCase().contains(aWord.toLowerCase())))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+												aWordNotFound=false;
+												break;
+											}
+										}
+										if (aWordNotFound) break; 
+									}
+									if(aWordNotFound) continue;
+									else{
+										found=1;
+										if(myKeyWord.equals("")) myKeyWord+=keywordString;
+										else{
+											String[] myKeys = myKeyWord.split("\\|[ ]*");
+											Boolean exists = false;
+											for(int keys=0; keys<myKeys.length; keys++){
+												if(keywordString.equalsIgnoreCase(myKeys[keys])){
+													exists = true;
+													break;
+												}
+											}
+											if(!exists) myKeyWord+="| "+keywordString;
+										}
+									}
+								}
+								if(found==1) continue;
+								else{
+									TweetContainKeywords=false;
+									break;
+								}
 							}
 						}
 				}
