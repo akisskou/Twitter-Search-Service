@@ -153,16 +153,17 @@ public class TwitterServlet extends HttpServlet {
 				for (Status tweet : ConfigNRetrieve.tweets) {
 				  //if(tweet.getLang().equals("en")){
 					String myKeyWord="";
+					String tweetText = tweet.getText();
 					Boolean TweetContainKeywords =true;
+					List<Boolean> isStemmed = new ArrayList<Boolean>();
 					String actualKeyword = "";
 					if(logic.equals("and")){
-						
 						 for(String[] keyWords: keywordsList){	
 							
 							int found=0;
 							for(String keywordString: keyWords) {
 								boolean allCapitals = false;
-								String tweetText = tweet.getText();
+								//String tweetText = tweet.getText();
 								String myKeywordString = keywordString.trim();
 								if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 									myKeywordString = keywordString.split("\\(")[0].trim();
@@ -175,8 +176,9 @@ public class TwitterServlet extends HttpServlet {
 									
 								//if(tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+".") || tweetText.contains("\n"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"\n") || tweetText.contains("\n"+myKeywordString+"\n") || tweetText.contains("-"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"-")){
 								if(tweetText.contains(myKeywordString) && (!allCapitals || ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z')))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
+									
 									found=1;
-									if(myKeyWord.equals("")) myKeyWord+=keywordString;
+									if(myKeyWord.equals("")) {myKeyWord+=keywordString; isStemmed.add(false);}
 									else{
 										String[] myKeys = myKeyWord.split("\\|[ ]*");
 										Boolean exists = false;
@@ -186,7 +188,7 @@ public class TwitterServlet extends HttpServlet {
 												break;
 											}
 										}
-										if(!exists) myKeyWord+="| "+keywordString;
+										if(!exists) {myKeyWord+="| "+keywordString; isStemmed.add(false);}
 									}
 									if(actualKeyword.equals("")) actualKeyword+=keywordString;
 									else actualKeyword+="| "+keywordString;
@@ -202,7 +204,7 @@ public class TwitterServlet extends HttpServlet {
 									String u = s.toString();
 									if(tweetText.contains(u)){ //&& (tweetText.indexOf(u)==0 || (tweetText.charAt(tweetText.indexOf(u)-1)<'a' || tweetText.charAt(tweetText.indexOf(u)-1)>'z') && (tweetText.charAt(tweetText.indexOf(u)-1)<'A' || tweetText.charAt(tweetText.indexOf(u)-1)>'Z'))){	
 										found=1;
-										if(myKeyWord.equals("")) myKeyWord+=keywordString;
+										if(myKeyWord.equals("")) {myKeyWord+=keywordString; isStemmed.add(true);}
 										else{
 											String[] myKeys = myKeyWord.split("\\|[ ]*");
 											Boolean exists = false;
@@ -212,7 +214,7 @@ public class TwitterServlet extends HttpServlet {
 													break;
 												}
 											}
-											if(!exists) myKeyWord+="| "+keywordString;
+											if(!exists) {myKeyWord+="| "+keywordString; isStemmed.add(false);}
 										}
 										if(actualKeyword.equals("")) actualKeyword+=u;
 										else actualKeyword+="| "+u;
@@ -223,7 +225,7 @@ public class TwitterServlet extends HttpServlet {
 							if (found==1)
 								continue;
 							else{
-								String tweetText = tweet.getText();
+								//String tweetText = tweet.getText();
 								String[] tweetwords = tweetText.split(" ");
 								for(String keywordString: keyWords) {
 									boolean allCapitals = false;
@@ -234,6 +236,8 @@ public class TwitterServlet extends HttpServlet {
 									if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 									String[] wordsOfKeywordString = myKeywordString.split(" ");
 									boolean aWordNotFound=true;
+									String[] actualWords = new String[wordsOfKeywordString.length];
+									int wordscounter =0;
 									for(String aWord: wordsOfKeywordString){
 										if(!allCapitals){
 											Stemmer s = new Stemmer(); 
@@ -248,6 +252,18 @@ public class TwitterServlet extends HttpServlet {
 										for(String aTweetWord: tweetwords){
 											if(aTweetWord.equals(aWord) || (!allCapitals && (aTweetWord.toLowerCase().contains(aWord.toLowerCase())))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
 												aWordNotFound=false;
+												actualWords[wordscounter++]=aWord;
+												/*int startIndex, endIndex;
+												
+												if(!allCapitals){
+													
+													startIndex = aTweetWord.toLowerCase().indexOf(aWord.toLowerCase());
+													
+												}
+												else startIndex = aTweetWord.indexOf(aWord);
+												endIndex = startIndex + aWord.length();
+												while(endIndex<aTweetWord.length() && ((aTweetWord.charAt(endIndex)>='a' && aTweetWord.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
+												tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());*/
 												break;
 											}
 										}
@@ -256,7 +272,8 @@ public class TwitterServlet extends HttpServlet {
 									if(aWordNotFound) continue;
 									else{
 										found=1;
-										if(myKeyWord.equals("")) myKeyWord+=keywordString;
+										
+										if(myKeyWord.equals("")) myKeyWord+=keywordString; 
 										else{
 											String[] myKeys = myKeyWord.split("\\|[ ]*");
 											Boolean exists = false;
@@ -267,6 +284,11 @@ public class TwitterServlet extends HttpServlet {
 												}
 											}
 											if(!exists) myKeyWord+="| "+keywordString;
+										}
+										for(String anActual: actualWords){
+											isStemmed.add(true);
+											if(actualKeyword.equals("")) actualKeyword+=anActual;
+											else actualKeyword+="| "+anActual;
 										}
 									}
 								}
@@ -285,7 +307,7 @@ public class TwitterServlet extends HttpServlet {
 								
 								for(String keywordString: keyWords) {
 									boolean allCapitals = false;
-									String tweetText = tweet.getText();
+									//String tweetText = tweet.getText();
 									String myKeywordString = keywordString.trim();
 									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 										myKeywordString = keywordString.split("\\(")[0].trim();
@@ -338,7 +360,9 @@ public class TwitterServlet extends HttpServlet {
 							jsonObject.put("poster", tweet.getUser().getName());
 							jsonObject.put("postDate", tweet.getCreatedAt());
 							String[] myKeywordsArray = actualKeyword.split("\\|[ ]*");
-							String tweetText = tweet.getText();
+							//String tweetText = tweet.getText();
+							int stemcount = 0;
+							if(myKeywordsArray.length>0){
 							for(String aKeyword: myKeywordsArray){
 								boolean allCapitals = false;
 								if (aKeyword.toLowerCase().indexOf(" (aka")>=0 || aKeyword.toLowerCase().indexOf(" (acronym")>=0){
@@ -368,8 +392,14 @@ public class TwitterServlet extends HttpServlet {
 								}
 								else startIndex = tweetText.indexOf(aKeyword);
 								endIndex = startIndex + aKeyword.length();
-								while(endIndex<tweetText.length() && ((tweetText.charAt(endIndex)>='a' && tweetText.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
+								System.out.print("fuck ");
+								if(isStemmed.get(stemcount)==true){
+									while(endIndex<tweetText.length() && ((tweetText.charAt(endIndex)>='a' && tweetText.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
+									stemcount++;
+								}
+								System.out.println("you");
 								tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());
+							}
 							}
 							jsonObject.put("postText", tweetText);
 							jsonObject.put("postPhoto", images);
