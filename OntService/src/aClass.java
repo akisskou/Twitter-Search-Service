@@ -10,6 +10,7 @@ public class aClass {
 	String comment="";
 	String aka="";
 	String acronym="";
+	//String language="";
 	List<aClass> subClasses = new ArrayList<aClass>();
 	boolean isSubClass = false;
 }

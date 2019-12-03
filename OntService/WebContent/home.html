@@ -32,6 +32,13 @@
 		float: right;
   		width: 75%;
 	}
+	
+	#jstree{
+		height:150px;
+    	overflow-x:auto;
+    	overflow-y:auto;
+	}
+	
 	.jstree-default a { 
     	white-space:normal !important; height: auto; 
 	}
@@ -46,7 +53,7 @@
 	}
 	.jstree-leaf a{
     	height: auto !important;
-	}
+	}*/
 	
 </style>
 </head>
@@ -254,11 +261,11 @@
 		    		  "plugins" : [ "wholerow", "checkbox" ]
 		    		});
 			
-			$('#jstree').slimScroll({
+			/*$('#jstree').slimScroll({
 				height: '150px',
-				width: '102%',
+				width: '106%',
 				overflow: scroll
-			});
+			});*/
 			
 			$('#jstree').on("select_node.jstree",
    			     function(evt, data){

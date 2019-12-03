@@ -42,6 +42,7 @@ public class OntServlet extends HttpServlet {
 	private static OWLOntologyManager manager;
 	private static IRI documentIRI;
 	private static List<aClass> allClasses;
+	//private static String languages = "";
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -66,6 +67,7 @@ public class OntServlet extends HttpServlet {
                     if(a.getValue() instanceof OWLLiteral) {
                         OWLLiteral val = (OWLLiteral) a.getValue();
                         f.label = val.getLiteral();
+                       //f.language = val.getLang();
                     }
                 }
         		else if(a.getProperty().isComment()) {
@@ -147,6 +149,8 @@ public class OntServlet extends HttpServlet {
 	private static String getSubKeywords(String keywords, aClass checked){
 		if(keywords.equals("")) keywords += checked.label;			
 		else keywords += "|"+checked.label;
+		//if(languages.equals("")) languages += checked.language;
+		//else languages += "|"+checked.language;
 		if(akalogic.equals("yes")){
 			if(!(checked.aka.equals(""))){
 				List<String> akaList = Arrays.asList(checked.aka.split(",[ ]*"));
@@ -231,6 +235,7 @@ public class OntServlet extends HttpServlet {
 			//URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
 			URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
 			List<String> keywordsList = new ArrayList<String>();
+			//List<String> languageList = new ArrayList<String>();
 			if(!checked.equals("null")){
 			List<String> checkedList = Arrays.asList(checked.split(","));
 			
@@ -242,7 +247,9 @@ public class OntServlet extends HttpServlet {
 							String keywords = getSubKeywords("", allClasses.get(i));
 							keywordsList.add(keywords);
 							if(querykeywords.equals("")) querykeywords = allClasses.get(i).label;
-							else querykeywords += ", "+allClasses.get(i).label;		
+							else querykeywords += ", "+allClasses.get(i).label;
+							//languageList.add(languages);
+							//languages="";
 						}
 						catch (Exception e) {
 				   			System.out.println(e);
@@ -257,6 +264,7 @@ public class OntServlet extends HttpServlet {
 				List<String> mykeywords = Arrays.asList(myKeywords.split(","));
 				for(int j=0; j<mykeywords.size(); j++){
 					keywordsList.add(mykeywords.get(j).trim());
+					//languageList.add("en");
 					if(querykeywords.equals("")) querykeywords = mykeywords.get(j).trim();
 					else querykeywords += ", "+mykeywords.get(j).trim();
 				}
@@ -264,9 +272,12 @@ public class OntServlet extends HttpServlet {
 			try{
 				JSONObject params = new JSONObject();
 				params.put("keywords", keywordsList);
+				//params.put("languages", languageList);
+				//System.out.println(languageList);
 			    params.put("place", "");
 			    params.put("logic", logic);
 			    String postData = params.toString();
+			    //System.out.println(postData);
 			    byte[] postDataBytes = postData.getBytes("UTF-8");
 			    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 			    conn.setRequestMethod("POST");
