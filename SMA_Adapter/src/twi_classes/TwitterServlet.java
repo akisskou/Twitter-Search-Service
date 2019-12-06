@@ -163,22 +163,21 @@ public class TwitterServlet extends HttpServlet {
 				  //if(tweet.getLang().equals("en")){
 					String myKeyWord="";
 					Boolean TweetContainKeywords =true;
-					List<Boolean> isStemmed = new ArrayList<Boolean>();
+					//List<Boolean> isStemmed = new ArrayList<Boolean>();
+					List<List<Boolean>> isStemmed = new ArrayList<List<Boolean>>();
 					String actualKeyword = "";
 					
 					if(logic.equals("and")){
-						int langlist=0;
+						
 						 for(String[] keyWords: keywordsList){	
-							int langcount=0;
+							List<Boolean> keywordStemmed = new ArrayList<Boolean>();
 							int found=0;
-							for(String keywordString: keyWords) {
+							/*for(String keywordString: keyWords) {
 								boolean allCapitals = false;
 								String tweetText = tweet.getText();
 								String myKeywordString = keywordString.trim();
 								if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 									myKeywordString = keywordString.split("\\(")[0].trim();
-									/*if(!tweet.getLang().equals(languageList.get(langlist)) && myKeywordString.length()<5)
-										continue;*/
 								}
 								if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 								if(!allCapitals){
@@ -235,19 +234,62 @@ public class TwitterServlet extends HttpServlet {
 							}
 							if (found==1)
 								continue;
-							else{
+							else{*/
 								String tweetText = tweet.getText();
-								String[] tweetwords = tweetText.split(" ");
+								String[] tweetwords = tweetText.split(" [#]*");
 								for(String keywordString: keyWords) {
+									
 									boolean allCapitals = false;
 									String myKeywordString = keywordString.trim();
 									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 										myKeywordString = keywordString.split("\\(")[0].trim();
-										/*if(!tweet.getLang().equals(languageList.get(langlist)) && myKeywordString.length()<5)
-											continue;*/
 									}
-									if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
-									if(allCapitals) continue;
+									//if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
+									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
+									if(allCapitals){
+										if(tweetText.contains(myKeywordString) && ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z'))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
+											found=1;
+											if(myKeyWord.equals("")) myKeyWord+=keywordString;
+											else{
+												String[] myKeys = myKeyWord.split("\\|[ ]*");
+												Boolean exists = false;
+												for(int keys=0; keys<myKeys.length; keys++){
+													if(keywordString.equalsIgnoreCase(myKeys[keys])){
+														exists = true;
+														break;
+													}
+												}
+												if(!exists) myKeyWord+="| "+keywordString;
+											}
+											if(actualKeyword.equals("")) actualKeyword+=keywordString;
+											else actualKeyword+="| "+keywordString;
+											break;
+										}
+										if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
+											continue;
+										}
+										
+									}
+									myKeywordString = myKeywordString.toLowerCase();
+									if(stopwords.contains(","+myKeywordString+",")) continue;
+									if(tweetText.toLowerCase().contains(myKeywordString)){ //&& (!allCapitals || ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z')))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
+										found=1;
+										if(myKeyWord.equals("")) myKeyWord+=myKeywordString;
+										else{
+											String[] myKeys = myKeyWord.split("\\|[ ]*");
+											Boolean exists = false;
+											for(int keys=0; keys<myKeys.length; keys++){
+												if(keywordString.equalsIgnoreCase(myKeys[keys])){
+													exists = true;
+													break;
+												}
+											}
+											if(!exists) myKeyWord+="| "+myKeywordString;
+										}
+										if(actualKeyword.equals("")) actualKeyword+=myKeywordString;
+										else actualKeyword+="| "+myKeywordString;
+										break;
+									}
 									//String[] wordsOfKeywordString = myKeywordString.split(" ");
 									List<String> tempwords = new ArrayList<String>(Arrays.asList(myKeywordString.toLowerCase().split(" ")));
 									for(int j=0; j<tempwords.size(); j++){
@@ -273,36 +315,67 @@ public class TwitterServlet extends HttpServlet {
 										
 										aWordNotFound=true;
 										for(String aTweetWord: tweetwords){
+											aTweetWord = aTweetWord.toLowerCase();
+											if(aTweetWord.contains(",")){
+												String[] myaWord = aTweetWord.split(",");
+												aTweetWord=myaWord[0];	
+											}
 											if(stopwords.contains(","+aTweetWord+",")) continue;
-											if(aTweetWord.equals(aWord) || (!allCapitals && (aTweetWord.toLowerCase().contains(aWord.toLowerCase())))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+											if(minDistance(aTweetWord,aWord)<=1){
+												aWordNotFound=false;
+												actualWords[wordscounter++]=aTweetWord;
+												//keywordStemmed.add(false);
+												break;
+											}
+											else if(aTweetWord.contains(aWord)){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
 												aWordNotFound=false;
 												actualWords[wordscounter++]=aWord;
+												//keywordStemmed.add(false);
 												break;
 											}
 											else{
+												/*if(aTweetWord.contains(",")){
+													String[] myaWord = aTweetWord.split(",");
+													aTweetWord=myaWord[0];	
+												}*/
+												/*if(aTweetWord.contains("#")){
+													String[] myaWord = aTweetWord.split("#");
+													aTweetWord=myaWord[1];	
+												}*/
+												String actualTweetWord = aTweetWord;
 												if(aWord.contains("-")){
 													String[] myaWord = aWord.split("-");
 													aWord="";
 													for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
+												}
+												if(aWord.contains("\'")){
+													String[] myaWord = aWord.split("\'");
+													aWord = myaWord[0];
+													//aWord="";
+													//for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
 												}
 												if(aTweetWord.contains("-")){
 													String[] myaWord = aTweetWord.split("-");
 													aTweetWord="";
 													for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 												}
-												if(aTweetWord.contains(",")){
-													String[] myaWord = aTweetWord.split(",");
-													aTweetWord=myaWord[0];	
+												if(aTweetWord.contains("\'")){
+													String[] myaWord = aTweetWord.split("\'");
+													aTweetWord = myaWord[0];
+													//aTweetWord="";
+													//for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 												}
-												if (minDistance(aWord,aTweetWord)<=1){
+												
+												if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 													aWordNotFound=false;
-													actualWords[wordscounter++]=aTweetWord;
+													actualWords[wordscounter++]=actualTweetWord;
+													//keywordStemmed.add(false);
 													break;
 												}
 											}
 										}
 										if (aWordNotFound){
-											if(!allCapitals){
+											//if(!allCapitals){
 												Stemmer s = new Stemmer(); 
 												char[] stemming = aWord.toCharArray();
 												for(int st=0; st<stemming.length; st++){
@@ -312,44 +385,69 @@ public class TwitterServlet extends HttpServlet {
 												aWord = s.toString();
 												
 												for(String aTweetWord: tweetwords){
+													aTweetWord = aTweetWord.toLowerCase();
+													if(aTweetWord.contains(",")){
+														String[] myaWord = aTweetWord.split(",");
+														aTweetWord=myaWord[0];	
+													}
 													if(stopwords.contains(","+aTweetWord+",")) continue;
-												if(aTweetWord.equals(aWord) || (aTweetWord.toLowerCase().contains(aWord.toLowerCase()))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+												/*if(aTweetWord.equals(aWord) || (aTweetWord.toLowerCase().contains(aWord.toLowerCase()))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
 													aWordNotFound=false;
-													actualWords[wordscounter++]=aWord;
+													actualWords[wordscounter++]=aTweetWord;
+													//keywordStemmed.add(true);
 													break;
-												}
+												}*/
+													if(minDistance(aTweetWord,aWord)<=1 || aTweetWord.contains(aWord)){
+														aWordNotFound=false;
+														actualWords[wordscounter++]=aTweetWord;
+														//keywordStemmed.add(false);
+														break;
+													}
+													/*else if(aTweetWord.contains(aWord)){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+														aWordNotFound=false;
+														actualWords[wordscounter++]=aWord;
+														//keywordStemmed.add(false);
+														break;
+													}*/
 												else{
-													if(aWord.contains("-")){
+													/*if(aTweetWord.contains(",")){
+														String[] myaWord = aTweetWord.split(",");
+														aTweetWord=myaWord[0];	
+													}*/
+													String actualTweetWord = aTweetWord;
+													/*if(aWord.contains("-")){
 														String[] myaWord = aWord.split("-");
 														aWord="";
 														for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
-													}
+													}*/
 													if(aTweetWord.contains("-")){
 														String[] myaWord = aTweetWord.split("-");
 														aTweetWord="";
 														for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 													}
-													if(aWord.contains("\'")){
+													/*if(aWord.contains("\'")){
 														String[] myaWord = aWord.split("\'");
 														aWord="";
 														for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
-													}
-													if(aTweetWord.contains(",")){
-														String[] myaWord = aTweetWord.split(",");
-														aTweetWord=myaWord[0];	
-													}
-													if (aTweetWord.contains(aWord)){
+													}*/
+													
+													if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
-														actualWords[wordscounter++]=aTweetWord;
+														actualWords[wordscounter++]=actualTweetWord;
+														//keywordStemmed.add(true);
 														break;
 													}
 												}
 											} 
+										//}
 										}
-										}
+										
 										if (aWordNotFound) break; 
 									}
-									if(aWordNotFound) continue;
+									if(aWordNotFound){
+										//keywordStemmed.clear();
+										continue;
+									}
 									else{
 										found=1;
 										if(myKeyWord.equals("")) myKeyWord+=keywordString;
@@ -365,10 +463,11 @@ public class TwitterServlet extends HttpServlet {
 											if(!exists) myKeyWord+="| "+keywordString;
 										}
 										for(String anActual: actualWords){
-											isStemmed.add(true);
+											//isStemmed.add(true);
 											if(actualKeyword.equals("")) actualKeyword+=anActual;
 											else if(!actualKeyword.toLowerCase().contains(anActual.toLowerCase())) actualKeyword+="| "+anActual;
 										}
+										//isStemmed.add(keywordStemmed);
 										break;
 									}
 								}
@@ -377,10 +476,10 @@ public class TwitterServlet extends HttpServlet {
 									TweetContainKeywords=false;
 									break;
 								}
-							}
+							//}
 						}
 				}
-					 else{
+					 /*else{
 					  
 							int found=0;
 							int langlist=0;
@@ -392,8 +491,7 @@ public class TwitterServlet extends HttpServlet {
 									String myKeywordString = keywordString.trim();
 									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 										myKeywordString = keywordString.split("\\(")[0].trim();
-										/*if(!tweet.getLang().equals(languageList.get(langlist)) && myKeywordString.length()<5)
-											continue;*/
+										
 									}
 									if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 									if(!allCapitals){
@@ -433,9 +531,7 @@ public class TwitterServlet extends HttpServlet {
 										String myKeywordString = keywordString.trim();
 										if ((keywordString.toLowerCase().indexOf(" (aka")>=0) || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 											myKeywordString = keywordString.split("\\(")[0].trim();
-											/*if(!tweet.getLang().equals(languageList.get(langlist)) && myKeywordString.length()<5){
-												continue;
-											}*/
+											
 										}
 										if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 										if(allCapitals) continue;
@@ -505,7 +601,7 @@ public class TwitterServlet extends HttpServlet {
 							}
 							
 							if (found==0) TweetContainKeywords=false;
-					 }
+					 }*/
 						
 						if(placeString.length()>1)
 							if(!(tweet.getUser().getLocation()).toLowerCase().contains(placeString.toLowerCase())) TweetContainKeywords=false;
@@ -517,19 +613,20 @@ public class TwitterServlet extends HttpServlet {
 								images+=(m.getMediaURL())+" "; } //get your url!
 							
 							JSONObject jsonObject = new JSONObject();
-							jsonObject.put("source", tweet.getSource()); 
 							jsonObject.put("sourceImg", tweet.getUser().getBiggerProfileImageURL());
 							jsonObject.put("poster", tweet.getUser().getName());
 							jsonObject.put("postDate", tweet.getCreatedAt());
 							String[] myKeywordsArray = actualKeyword.split("\\|[ ]*");
 							String tweetText = tweet.getText();
-							int stemcount = 0;
+							//int stemcount = 0;
 							for(String aKeyword: myKeywordsArray){
 								boolean allCapitals = false;
+								boolean isakaoracronym = false;
 								if (aKeyword.toLowerCase().indexOf(" (aka")>=0 || aKeyword.toLowerCase().indexOf(" (acronym")>=0){
 									aKeyword = aKeyword.split("\\(")[0].trim();
+									isakaoracronym=true;
 								}
-								if(aKeyword.toUpperCase().equals(aKeyword)) allCapitals=true;
+								if(minDistance(aKeyword,aKeyword.toUpperCase())<=1) allCapitals=true;
 								else{
 									boolean substring =false;
 									for(int i=0; i<myKeywordsArray.length; i++){
@@ -546,17 +643,17 @@ public class TwitterServlet extends HttpServlet {
 								
 								int startIndex, endIndex;
 								
-								if(!allCapitals){
+								if(!allCapitals || !isakaoracronym){
 									
 									startIndex = tweetText.toLowerCase().indexOf(aKeyword.toLowerCase());
 									
 								}
 								else startIndex = tweetText.indexOf(aKeyword);
 								endIndex = startIndex + aKeyword.length();
-								if(isStemmed.get(stemcount)==true){
+								/*if(isStemmed.get(stemcount)==true){
 									while(endIndex<tweetText.length() && ((tweetText.charAt(endIndex)>='a' && tweetText.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
 								}
-								stemcount++;
+								stemcount++;*/
 								tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());
 							}
 							jsonObject.put("postText", tweetText);
