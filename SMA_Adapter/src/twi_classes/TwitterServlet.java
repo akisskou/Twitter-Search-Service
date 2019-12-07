@@ -4,6 +4,7 @@ package twi_classes;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -164,85 +165,25 @@ public class TwitterServlet extends HttpServlet {
 					String myKeyWord="";
 					Boolean TweetContainKeywords =true;
 					//List<Boolean> isStemmed = new ArrayList<Boolean>();
-					List<List<Boolean>> isStemmed = new ArrayList<List<Boolean>>();
 					String actualKeyword = "";
-					
+					String tweetText = tweet.getText();
+
 					if(logic.equals("and")){
-						
 						 for(String[] keyWords: keywordsList){	
-							List<Boolean> keywordStemmed = new ArrayList<Boolean>();
 							int found=0;
-							/*for(String keywordString: keyWords) {
-								boolean allCapitals = false;
-								String tweetText = tweet.getText();
-								String myKeywordString = keywordString.trim();
-								if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
-									myKeywordString = keywordString.split("\\(")[0].trim();
-								}
-								if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
-								if(!allCapitals){
-									myKeywordString = myKeywordString.toLowerCase();
-									tweetText = tweetText.toLowerCase();
-								}
-									
-								//if(tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+".") || tweetText.contains("\n"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"\n") || tweetText.contains("\n"+myKeywordString+"\n") || tweetText.contains("-"+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+"-")){
-								if(tweetText.contains(myKeywordString) && (!allCapitals || ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z')))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
-									found=1;
-									if(myKeyWord.equals("")) {myKeyWord+=keywordString; isStemmed.add(false);}
-									else{
-										String[] myKeys = myKeyWord.split("\\|[ ]*");
-										Boolean exists = false;
-										for(int keys=0; keys<myKeys.length; keys++){
-											if(keywordString.equalsIgnoreCase(myKeys[keys])){
-												exists = true;
-												break;
-											}
-										}
-										if(!exists) {myKeyWord+="| "+keywordString; isStemmed.add(false);}
-									}
-									if(actualKeyword.equals("")) actualKeyword+=keywordString;
-									else actualKeyword+="| "+keywordString;
-									break;
-								}
-								if(!allCapitals){
-									Stemmer s = new Stemmer(); 
-									char[] stemming = myKeywordString.toCharArray();
-									for(int st=0; st<stemming.length; st++){
-										s.add(stemming[st]);
-									}
-									s.stem();
-									String u = s.toString();
-									if(tweetText.contains(u)){ //&& (tweetText.indexOf(u)==0 || (tweetText.charAt(tweetText.indexOf(u)-1)<'a' || tweetText.charAt(tweetText.indexOf(u)-1)>'z') && (tweetText.charAt(tweetText.indexOf(u)-1)<'A' || tweetText.charAt(tweetText.indexOf(u)-1)>'Z'))){	
-										found=1;
-										if(myKeyWord.equals("")) {myKeyWord+=keywordString; isStemmed.add(true);}
-										else{
-											String[] myKeys = myKeyWord.split("\\|[ ]*");
-											Boolean exists = false;
-											for(int keys=0; keys<myKeys.length; keys++){
-												if(keywordString.equalsIgnoreCase(myKeys[keys])){
-													exists = true;
-													break;
-												}
-											}
-											if(!exists) {myKeyWord+="| "+keywordString; isStemmed.add(true);}
-										}
-										if(actualKeyword.equals("")) actualKeyword+=u;
-										else actualKeyword+="| "+u;
-										break;
-									}
-								}
-							}
-							if (found==1)
-								continue;
-							else{*/
-								String tweetText = tweet.getText();
+							
 								String[] tweetwords = tweetText.split(" [#]*");
+								
 								for(String keywordString: keyWords) {
 									
 									boolean allCapitals = false;
 									String myKeywordString = keywordString.trim();
 									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 										myKeywordString = keywordString.split("\\(")[0].trim();
+									}
+									if(stopwords.contains(","+myKeywordString.toLowerCase()+",")){
+										
+										continue;
 									}
 									//if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
@@ -271,7 +212,6 @@ public class TwitterServlet extends HttpServlet {
 										
 									}
 									myKeywordString = myKeywordString.toLowerCase();
-									if(stopwords.contains(","+myKeywordString+",")) continue;
 									if(tweetText.toLowerCase().contains(myKeywordString)){ //&& (!allCapitals || ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z')))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
 										found=1;
 										if(myKeyWord.equals("")) myKeyWord+=myKeywordString;
@@ -290,7 +230,6 @@ public class TwitterServlet extends HttpServlet {
 										else actualKeyword+="| "+myKeywordString;
 										break;
 									}
-									//String[] wordsOfKeywordString = myKeywordString.split(" ");
 									List<String> tempwords = new ArrayList<String>(Arrays.asList(myKeywordString.toLowerCase().split(" ")));
 									for(int j=0; j<tempwords.size(); j++){
 										if(stopwords.contains(","+tempwords.get(j)+",")) tempwords.remove(j--);  
@@ -303,15 +242,7 @@ public class TwitterServlet extends HttpServlet {
 									String[] actualWords = new String[wordsOfKeywordString.length];
 									int wordscounter =0;
 									for(String aWord: wordsOfKeywordString){
-										/*if(!allCapitals){
-											Stemmer s = new Stemmer(); 
-											char[] stemming = aWord.toCharArray();
-											for(int st=0; st<stemming.length; st++){
-												s.add(stemming[st]);
-											}
-											s.stem();
-											aWord = s.toString();
-										}*/
+										
 										
 										aWordNotFound=true;
 										for(String aTweetWord: tweetwords){
@@ -324,24 +255,15 @@ public class TwitterServlet extends HttpServlet {
 											if(minDistance(aTweetWord,aWord)<=1){
 												aWordNotFound=false;
 												actualWords[wordscounter++]=aTweetWord;
-												//keywordStemmed.add(false);
 												break;
 											}
 											else if(aTweetWord.contains(aWord)){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
 												aWordNotFound=false;
 												actualWords[wordscounter++]=aWord;
-												//keywordStemmed.add(false);
 												break;
 											}
 											else{
-												/*if(aTweetWord.contains(",")){
-													String[] myaWord = aTweetWord.split(",");
-													aTweetWord=myaWord[0];	
-												}*/
-												/*if(aTweetWord.contains("#")){
-													String[] myaWord = aTweetWord.split("#");
-													aTweetWord=myaWord[1];	
-												}*/
+												
 												String actualTweetWord = aTweetWord;
 												if(aWord.contains("-")){
 													String[] myaWord = aWord.split("-");
@@ -351,8 +273,6 @@ public class TwitterServlet extends HttpServlet {
 												if(aWord.contains("\'")){
 													String[] myaWord = aWord.split("\'");
 													aWord = myaWord[0];
-													//aWord="";
-													//for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
 												}
 												if(aTweetWord.contains("-")){
 													String[] myaWord = aTweetWord.split("-");
@@ -362,20 +282,16 @@ public class TwitterServlet extends HttpServlet {
 												if(aTweetWord.contains("\'")){
 													String[] myaWord = aTweetWord.split("\'");
 													aTweetWord = myaWord[0];
-													//aTweetWord="";
-													//for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 												}
 												
 												if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 													aWordNotFound=false;
 													actualWords[wordscounter++]=actualTweetWord;
-													//keywordStemmed.add(false);
 													break;
 												}
 											}
 										}
 										if (aWordNotFound){
-											//if(!allCapitals){
 												Stemmer s = new Stemmer(); 
 												char[] stemming = aWord.toCharArray();
 												for(int st=0; st<stemming.length; st++){
@@ -391,61 +307,36 @@ public class TwitterServlet extends HttpServlet {
 														aTweetWord=myaWord[0];	
 													}
 													if(stopwords.contains(","+aTweetWord+",")) continue;
-												/*if(aTweetWord.equals(aWord) || (aTweetWord.toLowerCase().contains(aWord.toLowerCase()))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
-													aWordNotFound=false;
-													actualWords[wordscounter++]=aTweetWord;
-													//keywordStemmed.add(true);
-													break;
-												}*/
+												
 													if(minDistance(aTweetWord,aWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
 														actualWords[wordscounter++]=aTweetWord;
 														//keywordStemmed.add(false);
 														break;
 													}
-													/*else if(aTweetWord.contains(aWord)){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
-														aWordNotFound=false;
-														actualWords[wordscounter++]=aWord;
-														//keywordStemmed.add(false);
-														break;
-													}*/
+													
 												else{
-													/*if(aTweetWord.contains(",")){
-														String[] myaWord = aTweetWord.split(",");
-														aTweetWord=myaWord[0];	
-													}*/
+													
 													String actualTweetWord = aTweetWord;
-													/*if(aWord.contains("-")){
-														String[] myaWord = aWord.split("-");
-														aWord="";
-														for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
-													}*/
+													
 													if(aTweetWord.contains("-")){
 														String[] myaWord = aTweetWord.split("-");
 														aTweetWord="";
 														for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 													}
-													/*if(aWord.contains("\'")){
-														String[] myaWord = aWord.split("\'");
-														aWord="";
-														for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
-													}*/
 													
 													if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
 														actualWords[wordscounter++]=actualTweetWord;
-														//keywordStemmed.add(true);
 														break;
 													}
 												}
 											} 
-										//}
 										}
 										
 										if (aWordNotFound) break; 
 									}
 									if(aWordNotFound){
-										//keywordStemmed.clear();
 										continue;
 									}
 									else{
@@ -463,11 +354,9 @@ public class TwitterServlet extends HttpServlet {
 											if(!exists) myKeyWord+="| "+keywordString;
 										}
 										for(String anActual: actualWords){
-											//isStemmed.add(true);
 											if(actualKeyword.equals("")) actualKeyword+=anActual;
 											else if(!actualKeyword.toLowerCase().contains(anActual.toLowerCase())) actualKeyword+="| "+anActual;
 										}
-										//isStemmed.add(keywordStemmed);
 										break;
 									}
 								}
@@ -476,133 +365,170 @@ public class TwitterServlet extends HttpServlet {
 									TweetContainKeywords=false;
 									break;
 								}
-							//}
 						}
 				}
-					 /*else{
+					 else{
 					  
 							int found=0;
-							int langlist=0;
+							
 							for(String[] keyWords: keywordsList){
-								int langcount = 0;
+								String[] tweetwords = tweetText.split(" [#]*");
 								for(String keywordString: keyWords) {
 									boolean allCapitals = false;
-									String tweetText = tweet.getText();
+									
 									String myKeywordString = keywordString.trim();
 									if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
 										myKeywordString = keywordString.split("\\(")[0].trim();
 										
 									}
-									if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
-									if(!allCapitals){
-										myKeywordString = myKeywordString.toLowerCase();
-										tweetText = tweetText.toLowerCase();
-									}
-									if(tweetText.contains(myKeywordString) && (!allCapitals || ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z')))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
-										found=1;
-										myKeyWord=keywordString;
-										isStemmed.add(false);
-										actualKeyword=keywordString;
-										break;
-									}
-									if(!allCapitals){
-										Stemmer s = new Stemmer(); 
-										char[] stemming = myKeywordString.toCharArray();
-										for(int st=0; st<stemming.length; st++){
-											s.add(stemming[st]);
-										}
-										s.stem();
-										String u = s.toString();
-										if(tweetText.contains(u)){// && (tweetText.indexOf(u)==0 || (tweetText.charAt(tweetText.indexOf(u)-1)<'a' || tweetText.charAt(tweetText.indexOf(u)-1)>'z') && (tweetText.charAt(tweetText.indexOf(u)-1)<'A' || tweetText.charAt(tweetText.indexOf(u)-1)>'Z'))){	
+									if(stopwords.contains(","+myKeywordString.toLowerCase()+",")) continue;
+									//if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
+									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
+
+									if(allCapitals){
+										if(tweetText.contains(myKeywordString) && ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z'))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
 											found=1;
 											myKeyWord=keywordString;
-											isStemmed.add(true);
-											actualKeyword=u;
+											
+											actualKeyword=keywordString;
 											break;
 										}
+										if (keywordString.toLowerCase().indexOf(" (aka")>=0 || keywordString.toLowerCase().indexOf(" (acronym")>=0){
+											continue;
+										}
+										
 									}
-								}
-								if (found==1) break;
-								else{
-									String tweetText = tweet.getText();
-									String[] tweetwords = tweetText.split(" ");
-									for(String keywordString: keyWords) {
-										boolean allCapitals = false;
-										String myKeywordString = keywordString.trim();
-										if ((keywordString.toLowerCase().indexOf(" (aka")>=0) || keywordString.toLowerCase().indexOf(" (acronym")>=0){
-											myKeywordString = keywordString.split("\\(")[0].trim();
-											
-										}
-										if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
-										if(allCapitals) continue;
-										List<String> tempwords = new ArrayList<String>(Arrays.asList(myKeywordString.toLowerCase().split(" ")));
-										for(int j=0; j<tempwords.size(); j++){
-											if(stopwords.contains(","+tempwords.get(j)+",")) tempwords.remove(j--);  
-										}
-										String[] wordsOfKeywordString = new String[tempwords.size()]; 
-										for(int j=0; j<tempwords.size(); j++){
-											wordsOfKeywordString[j] = tempwords.get(j);
-										}
-										boolean aWordNotFound=true;
-										String[] actualWords = new String[wordsOfKeywordString.length];
-										int wordscounter =0;
-										for(String aWord: wordsOfKeywordString){
-											
-											aWordNotFound=true;
-											for(String aTweetWord: tweetwords){
-												if(stopwords.contains(","+aTweetWord+",")) continue;
-												if(aTweetWord.equals(aWord) || (aTweetWord.toLowerCase().contains(aWord.toLowerCase()))){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+									myKeywordString = myKeywordString.toLowerCase();
+									if(tweetText.toLowerCase().contains(myKeywordString)){										found=1;
+										found=1;
+										myKeyWord=myKeywordString;
+										actualKeyword=myKeywordString;
+										break;
+									}
+									List<String> tempwords = new ArrayList<String>(Arrays.asList(myKeywordString.toLowerCase().split(" ")));
+									for(int j=0; j<tempwords.size(); j++){
+										if(stopwords.contains(","+tempwords.get(j)+",")) tempwords.remove(j--);  
+									}
+									String[] wordsOfKeywordString = new String[tempwords.size()]; 
+									for(int j=0; j<tempwords.size(); j++){
+										wordsOfKeywordString[j] = tempwords.get(j);
+									}
+									boolean aWordNotFound=true;
+									String[] actualWords = new String[wordsOfKeywordString.length];
+									int wordscounter =0;
+									for(String aWord: wordsOfKeywordString){
+										aWordNotFound=true;
+										for(String aTweetWord: tweetwords){
+											aTweetWord = aTweetWord.toLowerCase();
+											if(aTweetWord.contains(",")){
+												String[] myaWord = aTweetWord.split(",");
+												aTweetWord=myaWord[0];	
+											}
+											if(stopwords.contains(","+aTweetWord+",")) continue;
+											if(minDistance(aTweetWord,aWord)<=1){
+												aWordNotFound=false;
+												actualWords[wordscounter++]=aTweetWord;
+												break;
+											}
+											else if(aTweetWord.contains(aWord)){ //|| ed.minDistance(aTweetWord.toLowerCase(), aWord.toLowerCase())==1))){
+												aWordNotFound=false;
+												actualWords[wordscounter++]=aWord;
+												break;
+											}
+											else{
+												
+												String actualTweetWord = aTweetWord;
+												if(aWord.contains("-")){
+													String[] myaWord = aWord.split("-");
+													aWord="";
+													for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
+												}
+												if(aWord.contains("\'")){
+													String[] myaWord = aWord.split("\'");
+													aWord = myaWord[0];
+												}
+												if(aTweetWord.contains("-")){
+													String[] myaWord = aTweetWord.split("-");
+													aTweetWord="";
+													for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
+												}
+												if(aTweetWord.contains("\'")){
+													String[] myaWord = aTweetWord.split("\'");
+													aTweetWord = myaWord[0];
+												}
+												
+												if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 													aWordNotFound=false;
-													actualWords[wordscounter++]=aWord;
+													actualWords[wordscounter++]=actualTweetWord;
 													break;
 												}
-												else{
-													if(aWord.contains("-")){
-														String[] myaWord = aWord.split("-");
-														aWord="";
-														for(int k=0; k<myaWord.length; k++) aWord+=myaWord[k];					
+											}
+										}
+										if (aWordNotFound){
+												Stemmer s = new Stemmer(); 
+												char[] stemming = aWord.toCharArray();
+												for(int st=0; st<stemming.length; st++){
+													s.add(stemming[st]);
+												}
+												s.stem();
+												aWord = s.toString();
+												
+												for(String aTweetWord: tweetwords){
+													aTweetWord = aTweetWord.toLowerCase();
+													if(aTweetWord.contains(",")){
+														String[] myaWord = aTweetWord.split(",");
+														aTweetWord=myaWord[0];	
 													}
+													if(stopwords.contains(","+aTweetWord+",")) continue;
+												
+													if(minDistance(aTweetWord,aWord)<=1 || aTweetWord.contains(aWord)){
+														aWordNotFound=false;
+														actualWords[wordscounter++]=aTweetWord;
+														//keywordStemmed.add(false);
+														break;
+													}
+													
+												else{
+													
+													String actualTweetWord = aTweetWord;
+													
 													if(aTweetWord.contains("-")){
 														String[] myaWord = aTweetWord.split("-");
 														aTweetWord="";
 														for(int k=0; k<myaWord.length; k++) aTweetWord+=myaWord[k];					
 													}
-													if(aTweetWord.contains(",")){
-														String[] myaWord = aTweetWord.split(",");
-														aTweetWord=myaWord[0];	
-													}
-													if (minDistance(aWord,aTweetWord)<=1){
+													
+													if (minDistance(aWord,aTweetWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
-														actualWords[wordscounter++]=aTweetWord;
+														actualWords[wordscounter++]=actualTweetWord;
 														break;
 													}
 												}
-											}
-											if(aWordNotFound) break;
+											} 
 										}
-										if(aWordNotFound) continue;
-										else{
-											found=1;
-											
-											myKeyWord=keywordString;
-											
-											for(String anActual: actualWords){
-												isStemmed.add(true);
-												if(actualKeyword.equals("")) actualKeyword+=anActual;
-												else if(!actualKeyword.toLowerCase().contains(anActual.toLowerCase())) actualKeyword+="| "+anActual;
-											}
-											break;
-										}
+										
+										if (aWordNotFound) break; 
 									}
-									if(found==1) break;
-								
-								
+									if(aWordNotFound){
+										continue;
+									}
+									else{
+										found=1;
+										myKeyWord=keywordString;
+										for(String anActual: actualWords){
+											if(actualKeyword.equals("")) actualKeyword+=anActual;
+											else if(!actualKeyword.toLowerCase().contains(anActual.toLowerCase())) actualKeyword+="| "+anActual;
+										}
+										break;
+									}
+								}
+								if(found==1) break;
+								else{
+									continue;
 								}
 							}
-							
-							if (found==0) TweetContainKeywords=false;
-					 }*/
-						
+							if(found==0) TweetContainKeywords=false;
+					 }
 						if(placeString.length()>1)
 							if(!(tweet.getUser().getLocation()).toLowerCase().contains(placeString.toLowerCase())) TweetContainKeywords=false;
 						
@@ -615,9 +541,10 @@ public class TwitterServlet extends HttpServlet {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sourceImg", tweet.getUser().getBiggerProfileImageURL());
 							jsonObject.put("poster", tweet.getUser().getName());
-							jsonObject.put("postDate", tweet.getCreatedAt());
+							String[] postDate = tweet.getCreatedAt().toString().split(" ");
+							jsonObject.put("postDate", postDate[0]+"\n"+postDate[2]+" "+postDate[1]+" "+postDate[5]+"\n"+postDate[3]);
 							String[] myKeywordsArray = actualKeyword.split("\\|[ ]*");
-							String tweetText = tweet.getText();
+							//String tweetText = tweet.getText();
 							//int stemcount = 0;
 							for(String aKeyword: myKeywordsArray){
 								boolean allCapitals = false;
@@ -674,6 +601,8 @@ public class TwitterServlet extends HttpServlet {
 				  
 					JSONObject result = new JSONObject();
 					result.put("listJSONobj", listJSONobj);
+					response.setContentType("text/html; charset=UTF-8");
+					response.setCharacterEncoding("UTF-8");
 					PrintWriter pw = response.getWriter();
 					pw.print(result.toString());
 					pw.close();

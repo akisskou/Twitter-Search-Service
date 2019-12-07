@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Status;
@@ -13,7 +15,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class ConfigNRetrieve implements Runnable{
-public static List<Status> tweets;
+public static CopyOnWriteArrayList <Status> tweets = new CopyOnWriteArrayList<Status>();
 	 public static void main(String[] args) throws TwitterException, FileNotFoundException{}
 
 	public  void run(){
@@ -43,7 +45,10 @@ public static List<Status> tweets;
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
-	    tweets = result.getTweets(); 
+		List<Status> mytweets = result.getTweets();
+		for(int i=0; i<mytweets.size(); i++){
+			tweets.add(mytweets.get(i));
+		}
 	    twitersIDs.add((float) tweets.get(0).getId());
 	    int keyword_index=0;
 	    Boolean oldTweetsExist=true;
@@ -156,8 +161,11 @@ public static List<Status> tweets;
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
-	    tweets = result.getTweets(); 
-	    twitersIDs.add((float) tweets.get(0).getId());
+		List<Status> mytweets = result.getTweets();
+		for(int i=0; i<mytweets.size(); i++){
+			tweets.add(mytweets.get(i));
+		}
+		twitersIDs.add((float) tweets.get(0).getId());
 	    int keyword_index=0;
 	    
 	    while(true) {

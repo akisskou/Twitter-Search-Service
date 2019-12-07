@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html" charset="ISO-8859-1">
 <title>Home</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -214,12 +214,12 @@
 			var tweets = '';
 			if (twitter.length>0){
 			
-				tweets += '<table table-layout="auto" width="100%"><tr padding="2px"><th>user</th><th>text</th><th>photo</th><th>date</th><th>source</th><th>query annotation</th></tr>';
+				tweets += '<table table-layout="auto" width="100%"><tr padding="2px"><th>user</th><th>text</th><th>date</th><th>query annotation</th></tr>';
 				for(i=0; i<twitter.length; i++){
 					if (twitter[i].postPhoto==="")
-						tweets += '<tr align="center"><td>'+twitter[i].poster+'<br><br><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'<br><br><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].keyword+'</td></tr>';
 					else
-						tweets += '<tr align="center"><td>'+twitter[i].poster+'<br><br><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'</td><td><img src="'+twitter[i].postPhoto+'" style="width:150px;height:150px;"></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].source+'</td><td>'+twitter[i].keyword+'</td></tr>';
+						tweets += '<tr align="center"><td>'+twitter[i].poster+'<br><br><img src="'+twitter[i].sourceImg+'"></td><td>'+twitter[i].postText+'<br><img src="'+twitter[i].postPhoto+'" style="width:150px;height:150px;"></td><td>'+twitter[i].postDate+'</td><td>'+twitter[i].keyword+'</td></tr>';
 				}
  			}
 			$('#tweets').html(tweets);

@@ -290,6 +290,7 @@ public class OntServlet extends HttpServlet {
 			    for (int c; (c = in.read()) >= 0;)
 			        sb.append((char)c);
 			    String resp = sb.toString();
+			    System.out.println(resp);
 			    List<String> myresp = Arrays.asList(resp.split("\\[",2));
 			    String jsonarr = "[" + myresp.get(1);
 			    JSONArray jsonarray = new JSONArray(jsonarr);
@@ -314,7 +315,8 @@ public class OntServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		response.setContentType("text/html; charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
 		PrintWriter pw = response.getWriter();
 		pw.print(all.toString());
 		pw.close();
