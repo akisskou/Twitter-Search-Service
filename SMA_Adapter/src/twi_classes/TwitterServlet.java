@@ -86,9 +86,7 @@ public class TwitterServlet extends HttpServlet {
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
-			//System.out.println("begin tweets:"+ConfigNRetrieve.tweets);
-			
+			} 			
 		}
 		
 	}
@@ -145,15 +143,9 @@ public class TwitterServlet extends HttpServlet {
 				try {
 					Search req = new Gson().fromJson(request.getReader(), Search.class);
 					List<String[]> keywordsList = new ArrayList<String[]>();
-					//List<String[]> languageList = new ArrayList<String[]>();
 					for(int i=0; i<req.keywords.length; i++){
 						keywordsList.add((req.keywords)[i].split("\\|"));
-						//languageList.add((req.languages)[i].split("\\|"));
 					}
-					/*String[] mykeywords = new String[req.mykeywords.length];
-					for(int i=0; i<req.mykeywords.length; i++){
-						mykeywords[i]=(req.mykeywords)[i];
-					}*/
 				  String placeString = (req.place);
 				  String logic = req.logic;
 				
@@ -161,10 +153,8 @@ public class TwitterServlet extends HttpServlet {
 				  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());
 				  
 				for (Status tweet : ConfigNRetrieve.tweets) {
-				  //if(tweet.getLang().equals("en")){
 					String myKeyWord="";
 					Boolean TweetContainKeywords =true;
-					//List<Boolean> isStemmed = new ArrayList<Boolean>();
 					String actualKeyword = "";
 					String tweetText = tweet.getText();
 
@@ -185,7 +175,6 @@ public class TwitterServlet extends HttpServlet {
 										
 										continue;
 									}
-									//if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
 									if(allCapitals){
 										if(tweetText.contains(myKeywordString) && ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z'))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
@@ -311,7 +300,6 @@ public class TwitterServlet extends HttpServlet {
 													if(minDistance(aTweetWord,aWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
 														actualWords[wordscounter++]=aTweetWord;
-														//keywordStemmed.add(false);
 														break;
 													}
 													
@@ -382,7 +370,6 @@ public class TwitterServlet extends HttpServlet {
 										
 									}
 									if(stopwords.contains(","+myKeywordString.toLowerCase()+",")) continue;
-									//if(myKeywordString.toUpperCase().equals(myKeywordString)) allCapitals=true;
 									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
 
 									if(allCapitals){
@@ -484,7 +471,6 @@ public class TwitterServlet extends HttpServlet {
 													if(minDistance(aTweetWord,aWord)<=1 || aTweetWord.contains(aWord)){
 														aWordNotFound=false;
 														actualWords[wordscounter++]=aTweetWord;
-														//keywordStemmed.add(false);
 														break;
 													}
 													
@@ -544,8 +530,6 @@ public class TwitterServlet extends HttpServlet {
 							String[] postDate = tweet.getCreatedAt().toString().split(" ");
 							jsonObject.put("postDate", postDate[0]+"\n"+postDate[2]+" "+postDate[1]+" "+postDate[5]+"\n"+postDate[3]);
 							String[] myKeywordsArray = actualKeyword.split("\\|[ ]*");
-							//String tweetText = tweet.getText();
-							//int stemcount = 0;
 							for(String aKeyword: myKeywordsArray){
 								boolean allCapitals = false;
 								boolean isakaoracronym = false;
@@ -577,10 +561,6 @@ public class TwitterServlet extends HttpServlet {
 								}
 								else startIndex = tweetText.indexOf(aKeyword);
 								endIndex = startIndex + aKeyword.length();
-								/*if(isStemmed.get(stemcount)==true){
-									while(endIndex<tweetText.length() && ((tweetText.charAt(endIndex)>='a' && tweetText.charAt(endIndex)<='z') || (tweetText.charAt(endIndex)>='A' && tweetText.charAt(endIndex)<='Z'))) endIndex++;
-								}
-								stemcount++;*/
 								tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());
 							}
 							jsonObject.put("postText", tweetText);
@@ -588,17 +568,7 @@ public class TwitterServlet extends HttpServlet {
 							jsonObject.put("keyword", myKeyWord.replace('|', ','));
 							listJSONobj.add(jsonObject);
 						}
-				  	  //}
 					}
-				  
-						
-					
-				  
-					  
-					
-					
-				  
-				  
 					JSONObject result = new JSONObject();
 					result.put("listJSONobj", listJSONobj);
 					response.setContentType("text/html; charset=UTF-8");
@@ -612,9 +582,6 @@ public class TwitterServlet extends HttpServlet {
 				}
 			}
 			
-		}
-			
-			
-		    
+		}    
 	}
 }
