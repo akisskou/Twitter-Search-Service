@@ -1,6 +1,7 @@
 package twi_classes;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +17,11 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class ConfigNRetrieve implements Runnable{
 public static CopyOnWriteArrayList <Status> tweets = new CopyOnWriteArrayList<Status>();
-	 public static void main(String[] args) throws TwitterException, FileNotFoundException{}
+	
+	//public static  List<Status> tweets = new ArrayList<Status>();
+
+	
+	public static void main(String[] args) throws TwitterException, FileNotFoundException{}
 
 	public  void run(){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -49,6 +54,7 @@ public static CopyOnWriteArrayList <Status> tweets = new CopyOnWriteArrayList<St
 		for(int i=0; i<mytweets.size(); i++){
 			tweets.add(mytweets.get(i));
 		}
+		//tweets = result.getTweets();
 	    twitersIDs.add((float) tweets.get(0).getId());
 	    int keyword_index=0;
 	    Boolean oldTweetsExist=true;
@@ -165,6 +171,7 @@ public static CopyOnWriteArrayList <Status> tweets = new CopyOnWriteArrayList<St
 		for(int i=0; i<mytweets.size(); i++){
 			tweets.add(mytweets.get(i));
 		}
+		//tweets = result.getTweets();
 		twitersIDs.add((float) tweets.get(0).getId());
 	    int keyword_index=0;
 	    

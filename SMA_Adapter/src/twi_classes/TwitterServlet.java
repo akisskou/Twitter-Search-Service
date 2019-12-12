@@ -61,6 +61,23 @@ public class TwitterServlet extends HttpServlet {
     	else return 2;
     }
     
+    private int minDistance2(String word1, String word2){
+    	int distance=0;
+    	char[] charword1 = word1.toCharArray();
+    	char[] charword2 = word2.toCharArray();
+    	if (charword1.length==charword2.length){
+    		for(int i=0; i<charword1.length; i++){
+    			if(charword1[i]==charword2[i]) continue;
+    			else{
+    				distance++;
+    				if(distance>1) return distance;
+    			}
+    		}
+    		return distance;
+    	}
+    	else return 2;
+    }
+    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -139,7 +156,7 @@ public class TwitterServlet extends HttpServlet {
 				pw.close();
 			}
 			else{
-			
+				String testtext = "";
 				try {
 					Search req = new Gson().fromJson(request.getReader(), Search.class);
 					List<String[]> keywordsList = new ArrayList<String[]>();
@@ -153,17 +170,18 @@ public class TwitterServlet extends HttpServlet {
 				  System.out.println("The number of tweets is: "+ConfigNRetrieve.tweets.size());
 				  
 				for (Status tweet : ConfigNRetrieve.tweets) {
+					
 					String myKeyWord="";
 					Boolean TweetContainKeywords =true;
 					String actualKeyword = "";
 					String tweetText = tweet.getText();
-
+					tweetText = tweetText.replace("\n","\n ");
+					testtext = tweetText;
 					if(logic.equals("and")){
+						
 						 for(String[] keyWords: keywordsList){	
 							int found=0;
-							
 								String[] tweetwords = tweetText.split(" [#]*");
-								
 								for(String keywordString: keyWords) {
 									
 									boolean allCapitals = false;
@@ -175,7 +193,7 @@ public class TwitterServlet extends HttpServlet {
 										
 										continue;
 									}
-									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
+									if(minDistance2(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
 									if(allCapitals){
 										if(tweetText.contains(myKeywordString) && ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z'))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
 											found=1;
@@ -227,18 +245,22 @@ public class TwitterServlet extends HttpServlet {
 									for(int j=0; j<tempwords.size(); j++){
 										wordsOfKeywordString[j] = tempwords.get(j);
 									}
+									
 									boolean aWordNotFound=true;
 									String[] actualWords = new String[wordsOfKeywordString.length];
 									int wordscounter =0;
 									for(String aWord: wordsOfKeywordString){
 										
-										
 										aWordNotFound=true;
 										for(String aTweetWord: tweetwords){
 											aTweetWord = aTweetWord.toLowerCase();
 											if(aTweetWord.contains(",")){
-												String[] myaWord = aTweetWord.split(",");
-												aTweetWord=myaWord[0];	
+												if(!aTweetWord.equals(",")){
+													String[] myaWord = aTweetWord.split(",");
+												
+													aTweetWord=myaWord[0];
+												}
+												else continue;
 											}
 											if(stopwords.contains(","+aTweetWord+",")) continue;
 											if(minDistance(aTweetWord,aWord)<=1){
@@ -292,8 +314,11 @@ public class TwitterServlet extends HttpServlet {
 												for(String aTweetWord: tweetwords){
 													aTweetWord = aTweetWord.toLowerCase();
 													if(aTweetWord.contains(",")){
-														String[] myaWord = aTweetWord.split(",");
-														aTweetWord=myaWord[0];	
+														if(!aTweetWord.equals(",")){
+															String[] myaWord = aTweetWord.split(",");
+															aTweetWord=myaWord[0];
+														}
+														else continue;
 													}
 													if(stopwords.contains(","+aTweetWord+",")) continue;
 												
@@ -324,10 +349,12 @@ public class TwitterServlet extends HttpServlet {
 										
 										if (aWordNotFound) break; 
 									}
+									
 									if(aWordNotFound){
 										continue;
 									}
 									else{
+										
 										found=1;
 										if(myKeyWord.equals("")) myKeyWord+=keywordString;
 										else{
@@ -345,6 +372,7 @@ public class TwitterServlet extends HttpServlet {
 											if(actualKeyword.equals("")) actualKeyword+=anActual;
 											else if(!actualKeyword.toLowerCase().contains(anActual.toLowerCase())) actualKeyword+="| "+anActual;
 										}
+										
 										break;
 									}
 								}
@@ -370,7 +398,7 @@ public class TwitterServlet extends HttpServlet {
 										
 									}
 									if(stopwords.contains(","+myKeywordString.toLowerCase()+",")) continue;
-									if(minDistance(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
+									if(minDistance2(myKeywordString,myKeywordString.toUpperCase())<=1) allCapitals=true;
 
 									if(allCapitals){
 										if(tweetText.contains(myKeywordString) && ((tweetText.indexOf(myKeywordString)==0 || ((tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)-1)<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)-1)>'Z'))) && (tweetText.indexOf(myKeywordString)+myKeywordString.length()==tweetText.length() || ((tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'a' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'z') && (tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())<'A' || tweetText.charAt(tweetText.indexOf(myKeywordString)+myKeywordString.length())>'Z'))))){ //&& ( !allCapitals  || tweetText.contains(" "+myKeywordString+" ") || tweetText.contains(" "+myKeywordString+",") || tweetText.contains(" "+myKeywordString+"."))){	
@@ -408,8 +436,11 @@ public class TwitterServlet extends HttpServlet {
 										for(String aTweetWord: tweetwords){
 											aTweetWord = aTweetWord.toLowerCase();
 											if(aTweetWord.contains(",")){
-												String[] myaWord = aTweetWord.split(",");
-												aTweetWord=myaWord[0];	
+												if(!aTweetWord.equals(",")){
+													String[] myaWord = aTweetWord.split(",");
+													aTweetWord=myaWord[0];
+												}
+												else continue;
 											}
 											if(stopwords.contains(","+aTweetWord+",")) continue;
 											if(minDistance(aTweetWord,aWord)<=1){
@@ -463,8 +494,11 @@ public class TwitterServlet extends HttpServlet {
 												for(String aTweetWord: tweetwords){
 													aTweetWord = aTweetWord.toLowerCase();
 													if(aTweetWord.contains(",")){
-														String[] myaWord = aTweetWord.split(",");
-														aTweetWord=myaWord[0];	
+														if(!aTweetWord.equals(",")){
+															String[] myaWord = aTweetWord.split(",");
+															aTweetWord=myaWord[0];
+														}
+														else continue;
 													}
 													if(stopwords.contains(","+aTweetWord+",")) continue;
 												
@@ -537,13 +571,16 @@ public class TwitterServlet extends HttpServlet {
 									aKeyword = aKeyword.split("\\(")[0].trim();
 									isakaoracronym=true;
 								}
-								if(minDistance(aKeyword,aKeyword.toUpperCase())<=1) allCapitals=true;
+								if(minDistance2(aKeyword,aKeyword.toUpperCase())<=1){
+									allCapitals=true;
+								}
 								else{
 									boolean substring =false;
 									for(int i=0; i<myKeywordsArray.length; i++){
+										
 										if (aKeyword.equals(myKeywordsArray[i])) continue;
 										else{
-											if (myKeywordsArray[i].toLowerCase().contains(aKeyword.toLowerCase()) && !myKeywordsArray[i].toLowerCase().contains("aka") && !myKeywordsArray[i].toLowerCase().contains("acronym")){
+											if (myKeywordsArray[i].toLowerCase().trim().contains(aKeyword.toLowerCase().trim()) && !myKeywordsArray[i].toLowerCase().contains("(aka") && !myKeywordsArray[i].toLowerCase().contains("(acronym")){
 												substring=true;
 												break;
 											}
@@ -560,6 +597,7 @@ public class TwitterServlet extends HttpServlet {
 									
 								}
 								else startIndex = tweetText.indexOf(aKeyword);
+								if(startIndex<=-1) continue;
 								endIndex = startIndex + aKeyword.length();
 								tweetText = tweetText.substring(0,startIndex) + "<mark>" + tweetText.substring(startIndex,endIndex) + "</mark>" + tweetText.substring(endIndex,tweetText.length());
 							}
@@ -579,6 +617,8 @@ public class TwitterServlet extends HttpServlet {
 					System.out.println(result.toString());
 				}catch (Exception e) {
 				   	System.out.println(e);
+				   	e.printStackTrace();
+				   	System.out.println(testtext);
 				}
 			}
 			
