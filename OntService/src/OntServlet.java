@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -207,7 +209,10 @@ public class OntServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		
 		manager = OWLManager.createOWLOntologyManager();
-	    documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
+	    //documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
+	    //documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
+		
+	    documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/social_media_search_ontology_v1_fin.owl"));
 		try{
 	        ontology = manager.loadOntologyFromOntologyDocument(documentIRI);
             findClasses();
