@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -210,9 +212,11 @@ public class OntServlet extends HttpServlet {
 		
 		manager = OWLManager.createOWLOntologyManager();
 	    //documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
-	    //documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
-		
-	    documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/social_media_search_ontology_v1_fin.owl"));
+		Scanner s = new Scanner(new BufferedReader(new FileReader(getServletContext().getRealPath("/WEB-INF/infos.txt"))));
+		String[] line1 = s.nextLine().split(":");
+		System.out.println(line1[1].trim());
+		documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/"+line1[1].trim()));
+		//documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/social_media_search_ontology_v1_fin.owl"));
 		try{
 	        ontology = manager.loadOntologyFromOntologyDocument(documentIRI);
             findClasses();
@@ -234,7 +238,10 @@ public class OntServlet extends HttpServlet {
 		if(checked.equals("null") && myKeywords.equals("null")) ontology = fetchOntology(ontology);
 		else{
 			//URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
-			URL url = new URL("http://localhost:8080/SMA_Adapter/TwitterServlet");
+			String line2[] = s.nextLine().split(":");
+			String line3[] = s.nextLine().split(":");
+			//URL url = new URL("http://localhost:8585/SMA_Adapter/TwitterServlet");
+			URL url = new URL("http://"+line2[1].trim()+":"+line3[1].trim()+"/SMA_Adapter/TwitterServlet");
 			List<String> keywordsList = new ArrayList<String>();
 			if(!checked.equals("null")){
 			List<String> checkedList = Arrays.asList(checked.split(","));
