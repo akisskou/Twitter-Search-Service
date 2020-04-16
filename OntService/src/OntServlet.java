@@ -1,11 +1,15 @@
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -15,12 +19,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +41,11 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+//import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
+import com.google.gson.Gson;
 
 
 /**
@@ -98,7 +110,7 @@ public class OntServlet extends HttpServlet {
 	}
 	
 	private static void findSubclasses(){
-		for (final OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF))
+		for (final org.semanticweb.owlapi.model.OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF))
         {
         	OWLClass sup = (OWLClass) subClasse.getSuperClass();
         	OWLClass sub = (OWLClass) subClasse.getSubClass();
@@ -203,7 +215,7 @@ public class OntServlet extends HttpServlet {
 		return ontology;
 	}
 
-
+	
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -212,10 +224,11 @@ public class OntServlet extends HttpServlet {
 		
 		manager = OWLManager.createOWLOntologyManager();
 	    //documentIRI = IRI.create("file:///C:/", "social_media_search_ontology_v1_fin.owl");
-		Scanner s = new Scanner(new BufferedReader(new FileReader(getServletContext().getRealPath("/WEB-INF/infos.txt"))));
-		String[] line1 = s.nextLine().split(":");
-		System.out.println(line1[1].trim());
-		documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/"+line1[1].trim()));
+		InputStream input = new FileInputStream(getServletContext().getRealPath("/WEB-INF/infos.properties"));
+    	Properties prop = new Properties();
+    	// load a properties file
+        prop.load(input);
+		documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/"+prop.getProperty("owlFile").trim()));
 		//documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/social_media_search_ontology_v1_fin.owl"));
 		try{
 	        ontology = manager.loadOntologyFromOntologyDocument(documentIRI);
@@ -228,95 +241,14 @@ public class OntServlet extends HttpServlet {
 		}
 		JSONObject all = new JSONObject();
 		List<JSONObject> ontology = new ArrayList<JSONObject>();
-		List<JSONObject> tweets = new ArrayList<JSONObject>();
-		String querykeywords="";
-		String checked = request.getParameter("items");
-		String myKeywords = request.getParameter("mykeywords");
-		
-		String logic = request.getParameter("logic");
-		akalogic = request.getParameter("akalogic");
-		if(checked.equals("null") && myKeywords.equals("null")) ontology = fetchOntology(ontology);
-		else{
-			//URL url = new URL("http://ponte.grid.ece.ntua.gr:8080/SMA_Adapter/retrieve");
-			String line2[] = s.nextLine().split(":");
-			String line3[] = s.nextLine().split(":");
-			//URL url = new URL("http://localhost:8585/SMA_Adapter/TwitterServlet");
-			URL url = new URL("http://"+line2[1].trim()+":"+line3[1].trim()+"/SMA_Adapter/TwitterServlet");
-			List<String> keywordsList = new ArrayList<String>();
-			if(!checked.equals("null")){
-			List<String> checkedList = Arrays.asList(checked.split(","));
-			
-			ontology = fetchOntology(ontology);
-			for(int j=0; j<checkedList.size(); j++){
-				for(int i=0; i<allClasses.size(); i++){
-					if(checkedList.get(j).equals(allClasses.get(i).id)){
-						try{
-							String keywords = getSubKeywords("", allClasses.get(i));
-							keywordsList.add(keywords);
-							if(querykeywords.equals("")) querykeywords = allClasses.get(i).label;
-							else querykeywords += ", "+allClasses.get(i).label;
-						}
-						catch (Exception e) {
-				   			System.out.println(e);
-				   		}
-						
-						break;	
-					}
-				}	
-			}
-			}
-			if(!myKeywords.equals("null")){
-				List<String> mykeywords = Arrays.asList(myKeywords.split(","));
-				for(int j=0; j<mykeywords.size(); j++){
-					keywordsList.add(mykeywords.get(j).trim());
-					if(querykeywords.equals("")) querykeywords = mykeywords.get(j).trim();
-					else querykeywords += ", "+mykeywords.get(j).trim();
-				}
-			}
-			try{
-				JSONObject params = new JSONObject();
-				params.put("keywords", keywordsList);
-			    params.put("place", "");
-			    params.put("logic", logic);
-			    String postData = params.toString();
-			    //System.out.println(postData);
-			    byte[] postDataBytes = postData.getBytes("UTF-8");
-			    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			    conn.setRequestMethod("POST");
-			    conn.setRequestProperty("Content-Type", "application/json");
-			    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-			    conn.setDoOutput(true);
-			    conn.getOutputStream().write(postDataBytes);
-			    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			    StringBuilder sb = new StringBuilder();
-			    for (int c; (c = in.read()) >= 0;)
-			        sb.append((char)c);
-			    String resp = sb.toString();
-			    System.out.println(resp);
-			    List<String> myresp = Arrays.asList(resp.split("\\[",2));
-			    String jsonarr = "[" + myresp.get(1);
-			    JSONArray jsonarray = new JSONArray(jsonarr);
-			    for (int k = 0; k < jsonarray.length(); k++) {
-		            tweets.add(jsonarray.getJSONObject(k));
-			    }
-			}
-		
-			
-			catch (Exception e) {
-	   			System.out.println(e);
-	   		}
-		}
+		ontology = fetchOntology(ontology);
 		try {
 			all.put("ontology", ontology);
-			all.put("tweets", tweets);
-			all.put("query", querykeywords);
-			all.put("total", tweets.size());
-			all.put("logic", logic);
-			all.put("akalogic", akalogic);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		response.setContentType("text/html; charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter pw = response.getWriter();
@@ -329,6 +261,169 @@ public class OntServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		InputClass inp = new Gson().fromJson(request.getReader(), InputClass.class);
+		JSONObject all = new JSONObject();
+		if(!inp.password.equals("1"+inp.username+"2!")) {
+			all.put("errormessage", "Username and password don't match. Please check your credentials and try again.");
+			response.setContentType("text/html; charset=UTF-8");
+			response.setCharacterEncoding("UTF-8");
+			PrintWriter pw = response.getWriter();
+			pw.print(all.toString());
+			pw.close();
+		}else{
+			if(inp.items.isEmpty() && inp.mykeywords.trim().isEmpty()) {
+				try {
+					all.put("errormessage", "No keywords found. Please select or type some keywords and try again.");
+					response.setContentType("text/html; charset=UTF-8");
+					response.setCharacterEncoding("UTF-8");
+					PrintWriter pw = response.getWriter();
+					pw.print(all.toString());
+					pw.close();
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else {
+				akalogic = inp.akalogic;
+				manager = OWLManager.createOWLOntologyManager();
+		    	InputStream input = new FileInputStream(getServletContext().getRealPath("/WEB-INF/infos.properties"));
+		    	Properties prop = new Properties();
+	            // load a properties file
+	            prop.load(input);
+				documentIRI = IRI.create(getServletContext().getResource("/WEB-INF/"+prop.getProperty("owlFile").trim()));
+			    try{
+			        ontology = manager.loadOntologyFromOntologyDocument(documentIRI);
+		            findClasses();
+		            findSubclasses();
+				}
+				catch (OWLOntologyCreationException e) {
+			        e.printStackTrace();
+				}
+				List<JSONObject> tweets = new ArrayList<JSONObject>();
+				String querykeywords="";
+				URL url = new URL("http://"+prop.getProperty("domain")+":"+prop.getProperty("port")+"/SMA_Adapter/TwitterServlet");
+				List<String> keywordsList = new ArrayList<String>();
+				if(!inp.items.isEmpty()){
+					List<String> checkedList = Arrays.asList(inp.items.split(","));
+					for(int j=0; j<checkedList.size(); j++){
+						for(int i=0; i<allClasses.size(); i++){
+							if(checkedList.get(j).equals(allClasses.get(i).id)){
+								try{
+									String keywords = getSubKeywords("", allClasses.get(i));
+									keywordsList.add(keywords);
+									if(querykeywords.equals("")) querykeywords = allClasses.get(i).label;
+									else querykeywords += ", "+allClasses.get(i).label;
+								}
+								catch (Exception e) {
+						   			System.out.println(e);
+						   		}
+								
+								break;	
+							}
+						}	
+					}
+				}
+				if(!inp.mykeywords.trim().isEmpty()){
+					List<String> mykeywords = Arrays.asList(inp.mykeywords.trim().split(","));
+					for(int j=0; j<mykeywords.size(); j++){
+						keywordsList.add(mykeywords.get(j).trim());
+						if(querykeywords.equals("")) querykeywords = mykeywords.get(j).trim();
+						else querykeywords += ", "+mykeywords.get(j).trim();
+					}
+				}
+				try{
+					JSONObject params = new JSONObject();
+					params.put("keywords", keywordsList);
+				    params.put("place", "");
+				    params.put("logic", inp.logic);
+				    String postData = params.toString();
+				    //System.out.println(postData);
+				    byte[] postDataBytes = postData.getBytes("UTF-8");
+				    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+				    conn.setRequestMethod("POST");
+				    conn.setRequestProperty("Content-Type", "application/json");
+				    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+				    conn.setDoOutput(true);
+				    conn.getOutputStream().write(postDataBytes);
+				    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+				    StringBuilder sb = new StringBuilder();
+				    for (int c; (c = in.read()) >= 0;)
+				        sb.append((char)c);
+				    String resp = sb.toString();
+				    System.out.println(resp);
+				    List<String> myresp = Arrays.asList(resp.split("\\[",2));
+				    String jsonarr = "[" + myresp.get(1);
+				    JSONArray jsonarray = new JSONArray(jsonarr);
+				    for (int k = 0; k < jsonarray.length(); k++) {
+			            tweets.add(jsonarray.getJSONObject(k));
+				    }
+				    all.put("tweets", tweets);
+					all.put("query", querykeywords);
+					all.put("total", tweets.size());
+					all.put("logic", inp.logic);
+					all.put("akalogic", akalogic);
+					
+					response.setContentType("text/html; charset=UTF-8");
+					response.setCharacterEncoding("UTF-8");
+					PrintWriter pw = response.getWriter();
+					pw.print(all.toString());
+					pw.close();
+					
+					final Sardine upSardine = SardineFactory.begin(inp.username, inp.password);
+			    	if(!upSardine.exists("http://83.212.104.6/hcloud/remote.php/webdav/Social-Media-Search-Results")){
+			    		upSardine.createDirectory("http://83.212.104.6/hcloud/remote.php/webdav/Social-Media-Search-Results");
+			    	}
+			    	String inputJSON = "{\"smedia\":\""+inp.smedia+"\",\"items\":\""+inp.items+"\",\"mykeywords\":\""+inp.mykeywords.trim()+"\",\"logic\":\""+inp.logic+"\",\"akalogic\":\""+akalogic+"\"}";
+			    	byte[] reqBytes = inputJSON.getBytes(StandardCharsets.UTF_8);
+			    	Date date = new Date();
+					Object param = new java.sql.Timestamp(date.getTime());
+			    	String requestFile = inp.username+"-"+((Timestamp) param).toString().replace("-","").replace(" ","").replace(":","").split("\\.")[0]+"-Request.json";
+			    	upSardine.put("http://83.212.104.6/hcloud/remote.php/webdav/Social-Media-Search-Results/"+requestFile, reqBytes);
+			    	String outputJSON = "{\"results\":"+tweets+",\"results_count\":\""+tweets.size()+"\"}";
+			    	byte[] respBytes = outputJSON.getBytes(StandardCharsets.UTF_8);
+				    String responseFile = inp.username+"-"+((Timestamp) param).toString().replace("-","").replace(" ","").replace(":","").split("\\.")[0]+"-Response.json";
+			    	upSardine.put("http://83.212.104.6/hcloud/remote.php/webdav/Social-Media-Search-Results/"+responseFile, respBytes);
+			    	JSONObject dbData = setCohortHistory(inp.username, inp.password, ((Timestamp) param).toString().split("\\.")[0], requestFile, responseFile);
+			    	System.out.println(dbData);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (Exception e) {
+		   			System.out.println(e);
+		   		}
+			}
+		}
 	}
+	
+	private static JSONObject setCohortHistory(String username, String password, String submitDate, String jsonfileInput, String jsonfileOutput) throws IOException, JSONException{
+		URL url = new URL("https://private.harmonicss.eu/index.php/apps/coh/api/1.0/history");
+        String authString = username + ":" + password;
+        byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+        String authStringEnc = new String(authEncBytes);
+		JSONObject params = new JSONObject();
+		params.put("userId", username);
+		params.put("serviceId", "2");
+	    params.put("submitdate", submitDate);
+	    
+	    params.put("jsonfileInput", jsonfileInput);
+	    params.put("jsonfileOutput", jsonfileOutput);
+	    String postData = params.toString();
+	    byte[] postDataBytes = postData.getBytes("UTF-8");
+	    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+	    conn.setRequestMethod("POST");
+	    conn.setRequestProperty("Content-Type", "application/json");
+	    conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
+	    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+	    conn.setDoOutput(true);
+	    conn.getOutputStream().write(postDataBytes);
+	    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+	    StringBuilder sb = new StringBuilder();
+	    for (int c; (c = in.read()) >= 0;)
+	        sb.append((char)c);
+	    String resp = sb.toString();
+	    JSONObject dbData = new JSONObject(resp);
+	    return dbData;
+    }
 
 }

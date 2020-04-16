@@ -1,3 +1,3 @@
 ontology: social_media_search_ontology_v1_fin.owl
-domain: 147.102.238.82
-port: 8585 
+domain: localhost
+port: 8080 

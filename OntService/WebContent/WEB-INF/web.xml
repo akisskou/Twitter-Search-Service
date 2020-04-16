@@ -19,14 +19,4 @@
     <servlet-name>OntServlet</servlet-name>
     <url-pattern>/OntServlet</url-pattern>
   </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>SelectServlet</display-name>
-    <servlet-name>SelectServlet</servlet-name>
-    <servlet-class>SelectServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>SelectServlet</servlet-name>
-    <url-pattern>/SelectServlet</url-pattern>
-  </servlet-mapping>
 </web-app>

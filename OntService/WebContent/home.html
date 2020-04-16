@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-	*{
+	{
   		box-sizing: border-box;
 	}
 	table, th, td {
@@ -25,10 +25,10 @@
   	}
   	.left {
   		float: left;
-  		width: 25%;
+  		width: 20%;
 	}
 	.right {
-		padding: 30px;
+		padding: 10px;
 		float: right;
   		width: 75%;
 	}
@@ -53,7 +53,7 @@
 	}
 	.jstree-leaf a{
     	height: auto !important;
-	}*/
+	}
 	
 </style>
 </head>
@@ -63,7 +63,9 @@
 	<div class="column left">
 	<br>
 	<br>
-		<button onclick='homePage()'>Clear</button><br>
+		<button onclick='homePage()'>Clear</button><br><br>
+		<input type="text" id="username" placeholder="username" value="test1" size="8">
+		<input type="password" id="password" placeholder="password" value="1test12!" size="8"><br>
 		<p>Search logic?</p>
 		<form id="myForm">
   			<input type="radio" value="and" name="logic" checked> AND		
@@ -129,29 +131,37 @@
  		}
  		var theurl;
  		sessionStorage.clear();
- 		var myItems=null;
- 		var myKeywords=null;
- 		var logicType='and';
  		sessionStorage.setItem("logic", "and");
- 		var akaLogicType='no';
  		sessionStorage.setItem("akalogic", "no");
- 		theurl='OntServlet?items='+myItems+'&mykeywords='+myKeywords+'&logic='+logicType+'&akalogic='+akaLogicType;
+ 		theurl='OntServlet';
  		
  		var client = new HttpClient();
  		client.get(theurl, function(response) { 
 			var response1 = JSON.parse(response);
 			var ont = response1.ontology;
 			ontUser.innerHTML = '';
-			var twitter = response1.tweets;
-			var query = response1.query;
-			var total = response1.total;
-			var logic = response1.logic;
-			var akalogic = response1.akalogic;
 			fetchOntology(ont,0);
 			});
 	}
 	
 	function getResults() {
+		var username = document.getElementById("username");
+ 		var password = document.getElementById("password");
+ 		
+ 		if (!(username && username.value.trim()) || !(password && password.value.trim())){
+			alert("Please enter username and password");
+			return false;
+		}
+ 		
+ 		var myItems = sessionStorage.getItem("items");
+ 		var myKeywords = document.getElementById('mykeywords');
+		if (!(myKeywords && myKeywords.value.trim()) && !myItems){
+			alert("Please type or select some keywords");
+			return false;
+		}
+		var logicType = sessionStorage.getItem("logic");
+ 		var akaLogicType = sessionStorage.getItem("akalogic");
+		
  		var HttpClient = function() {
  			this.get = function(aUrl, aCallback) {
  				var anHttpRequest = new XMLHttpRequest();
@@ -159,25 +169,21 @@
  					if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
  						aCallback(anHttpRequest.responseText);
  					}
- 				anHttpRequest.open( "GET", aUrl, true ); 
- 				anHttpRequest.send( null ); 
+ 				anHttpRequest.open( "POST", aUrl, true ); 
+ 				anHttpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+ 				anHttpRequest.send(JSON.stringify({"smedia": "Twitter", "username": username.value.trim(), "password": password.value.trim(), "items": myItems, "mykeywords": myKeywords.value.trim(), "logic": logicType, "akalogic": akaLogicType}));
  			}
  		}
- 		var theurl;
- 		var myItems = sessionStorage.getItem("items");
- 		var myKeywords = document.getElementById('mykeywords');
-		if (!(myKeywords && myKeywords.value.trim()) && !myItems){
-			alert("Please enter or select some keywords");
-			return false;
-		}
- 		var logicType = sessionStorage.getItem("logic");
- 		var akaLogicType = sessionStorage.getItem("akalogic");
- 		if(myKeywords && myKeywords.value.trim()) theurl='OntServlet?items='+myItems+'&mykeywords='+myKeywords.value.trim()+'&logic='+logicType+'&akalogic='+akaLogicType;
- 		else theurl='OntServlet?items='+myItems+'&mykeywords=null&logic='+logicType+'&akalogic='+akaLogicType;
+ 		var theurl = 'OntServlet';
+ 		
  		var client = new HttpClient();
  		client.get(theurl, function(response) { 
 			var response1 = JSON.parse(response);
-			var ont = response1.ontology;
+			if(response1['errormessage']){
+ 				var errorMessage = "<h5 align='left'>"+response1.errormessage+"<h5>";
+ 				$('#myResults').html(errorMessage);
+ 			}
+			else{
 			var twitter = response1.tweets;
 			var query = response1.query;
 			var total = response1.total;
@@ -200,6 +206,7 @@
 				}
  			}
 			$('#tweets').html(tweets);
+			}
  		});
 	}
 	
