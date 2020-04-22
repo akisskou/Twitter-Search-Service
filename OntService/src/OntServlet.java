@@ -271,7 +271,7 @@ public class OntServlet extends HttpServlet {
 			pw.print(all.toString());
 			pw.close();
 		}else{
-			if(inp.items.isEmpty() && inp.mykeywords.trim().isEmpty()) {
+			if(inp.items.isEmpty() && inp.mykeywords.replace(",", "").trim().isEmpty()) {
 				try {
 					all.put("errormessage", "No keywords found. Please select or type some keywords and try again.");
 					response.setContentType("text/html; charset=UTF-8");
@@ -403,7 +403,7 @@ public class OntServlet extends HttpServlet {
         String authStringEnc = new String(authEncBytes);
 		JSONObject params = new JSONObject();
 		params.put("userId", username);
-		params.put("serviceId", "2");
+		params.put("serviceId", "6");
 	    params.put("submitdate", submitDate);
 	    
 	    params.put("jsonfileInput", jsonfileInput);

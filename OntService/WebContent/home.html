@@ -131,6 +131,8 @@
  		}
  		var theurl;
  		sessionStorage.clear();
+ 		sessionStorage.setItem("items", "");
+ 		sessionStorage.setItem("mykeywords", "");
  		sessionStorage.setItem("logic", "and");
  		sessionStorage.setItem("akalogic", "no");
  		theurl='OntServlet';
@@ -182,6 +184,7 @@
 			if(response1['errormessage']){
  				var errorMessage = "<h5 align='left'>"+response1.errormessage+"<h5>";
  				$('#myResults').html(errorMessage);
+ 				$('#tweets').html("");
  			}
 			else{
 			var twitter = response1.tweets;
